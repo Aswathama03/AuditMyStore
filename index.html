@@ -182,6 +182,7 @@ tailwind.config = {
   .light-mode h1, .light-mode h2, .light-mode h3, .light-mode h4 { color: #0f172a; }
   .light-mode p { color: #334155; }
   .light-mode .font-display { color: #0f172a; }
+  .light-mode #roadmap li, .light-mode #roadmap li span { color: #000000 !important; }
 
   /* The "Diagnosis" span in h1 uses class light-text instead of text-white */
   .light-mode .light-text { color: #0f172a !important; }
@@ -481,24 +482,24 @@ tailwind.config = {
 
       <div id="dashboard" class="space-y-6 hidden">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 stagger">
-          <div class="glass rounded-3xl p-6 card-hover gradient-border">
+          <div class="glass rounded-3xl p-6 card-hover" style="border: 1px solid rgba(14,116,144,0.3);">
             <div class="flex items-center justify-between mb-4">
               <span class="text-xs font-semibold uppercase tracking-widest text-slate-400">Overall Score</span>
               <div class="tag bg-green-400/20 text-green-400 border border-green-400/30" id="score-badge">Excellent</div>
             </div>
             <div class="flex items-center justify-center py-2">
               <svg width="120" height="120" viewBox="0 0 120 120">
-                <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="10"/>
+                <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(14,116,144,0.15)" stroke-width="10"/>
                 <circle id="score-ring" cx="60" cy="60" r="48" fill="none" stroke="url(#scoreGrad)" stroke-width="10" stroke-linecap="round"
                   stroke-dasharray="301.6" stroke-dashoffset="301.6" transform="rotate(-90 60 60)" class="score-ring"/>
-                <text x="60" y="56" text-anchor="middle" font-family="Syne" font-size="28" font-weight="800" fill="url(#scoreGrad)" id="score-number">0</text>
-                <text x="60" y="72" text-anchor="middle" font-family="DM Sans" font-size="11" fill="rgba(255,255,255,0.5)">/ 100</text>
+                <text x="60" y="56" text-anchor="middle" font-family="Syne" font-size="28" font-weight="800" fill="#0e7490" id="score-number">0</text>
+                <text x="60" y="72" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#64748b">/ 100</text>
                 <defs><linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop stop-color="#94a3b8"/><stop offset="1" stop-color="#e2e8f0"/>
+                  <stop stop-color="#0e7490"/><stop offset="1" stop-color="#06b6d4"/>
                 </linearGradient></defs>
               </svg>
             </div>
-            <p class="text-center text-xs text-slate-400 mt-2" id="score-label">Store Health Assessment</p>
+            <p class="text-center text-xs font-semibold mt-2" style="color:#0e7490" id="score-label">Store Health Assessment</p>
           </div>
 
           <div class="glass rounded-3xl p-6 card-hover">
@@ -1150,18 +1151,20 @@ function renderDashboard(d) {
 
   const rm = d.roadmap;
   const phaseColors = isDark
-    ? { cyan:'#64748b', indigo:'#94a3b8', pink:'#78909c' }
-    : { cyan:'#0369a1', indigo:'#4338ca', pink:'#be185d' };
+    ? { cyan:'#22d3ee', indigo:'#818cf8', pink:'#f472b6' }
+    : { cyan:'#0e7490', indigo:'#4338ca', pink:'#be185d' };
   document.getElementById('roadmap').innerHTML = [rm.days1_30, rm.days31_60, rm.days61_90].map(ph => {
     const c = phaseColors[ph.color] || '#22d3ee';
-    const taskColor = isDark ? '#cbd5e1' : '#334155';
+    const taskColor = isDark ? '#f1f5f9' : '#000000';
     return `
       <div class="glass rounded-2xl p-5 card-hover" style="border-top:3px solid ${c}">
-        <div class="font-display font-bold text-sm mb-3" style="color:${c}">${ph.title}</div>
-        <ol class="space-y-2">
-          ${ph.tasks.map((t,j) => `<li class="flex items-start gap-2 text-sm" style="color:${taskColor};animation:fadeUp 0.4s ease forwards;opacity:0;animation-delay:${0.1+j*0.08}s">
-            <span class="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5" style="background:${c}22;color:${c}">${j+1}</span>${t}
-          </li>`).join('')}
+        <div style="color:${c};font-family:Syne,sans-serif;font-weight:700;font-size:0.875rem;margin-bottom:0.75rem">${ph.title}</div>
+        <ol style="list-style:none;padding:0;margin:0">
+          ${ph.tasks.map((t,j) => `
+            <li style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;color:${taskColor};animation:fadeUp 0.4s ease forwards;opacity:0;animation-delay:${0.1+j*0.08}s">
+              <span style="flex-shrink:0;width:20px;height:20px;min-width:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:${c}22;color:${c}">${j+1}</span>
+              <span style="color:${taskColor};font-size:0.875rem;line-height:1.5">${t}</span>
+            </li>`).join('')}
         </ol>
       </div>`;
   }).join('');
