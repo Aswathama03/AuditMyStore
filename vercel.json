@@ -3,12 +3,13 @@
   "builds": [
     { "src": "api/auth.js",     "use": "@vercel/node" },
     { "src": "api/callback.js", "use": "@vercel/node" },
-    { "src": "api/chat.js",     "use": "@vercel/node" }
+    { "src": "api/chat.js",     "use": "@vercel/node" },
+    { "src": "index.html",      "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/auth",     "dest": "/api/auth.js"     },
     { "src": "/api/callback", "dest": "/api/callback.js" },
     { "src": "/api/chat",     "dest": "/api/chat.js"     },
-    { "src": "/(.*)",         "dest": "/index.html"      }
+    { "src": "/",             "dest": "/index.html"      }
   ]
 }
