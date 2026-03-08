@@ -1598,6 +1598,7 @@ function updateNavStatus() {
 }
 
 
+function checkPaywall() {
   if (isUnlocked()) return true; // Pro user — always allow
   const count = getAuditCount();
   if (count >= FREE_AUDIT_LIMIT) {
