@@ -1693,7 +1693,15 @@ async function checkUnlockReturn() {
   const unlocked = params.get('unlocked');
   if (!sessionId || !unlocked) return;
 
-  // Verify with backend
+  window.history.replaceState({}, '', '/');
+
+  // If already logged in, just unlock silently
+  if (accountSessionToken) {
+    unlockApp(); updateNavStatus();
+    return;
+  }
+
+  // Verify payment then show set-password modal
   try {
     const resp = await fetch('/api/verify', {
       method: 'POST',
@@ -1702,12 +1710,8 @@ async function checkUnlockReturn() {
     });
     const data = await resp.json();
     if (data.valid) {
-      unlockApp();
-      hidePaywall();
-      updateNavStatus();
-      window.history.replaceState({}, '', '/');
-      notify('🎉 Pro unlocked! Unlimited audits activated.', 5000);
-      addChatMessage('ai', '🎉 Welcome to **AuditMyStore Pro**! You now have unlimited audits and PDF exports. Run as many analyses as you want!');
+      pendingSessionId = sessionId;
+      document.getElementById('set-password-modal').classList.remove('hidden');
     }
   } catch (err) {
     console.error('License verify error:', err);
@@ -1870,6 +1874,41 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
 <!-- Account Modal -->
+<!-- Set Password Modal — shown after payment -->
+<div id="set-password-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.9);backdrop-filter:blur(8px)">
+  <div class="glass rounded-3xl p-8 max-w-md w-full relative" style="border:1px solid rgba(34,211,238,0.4)">
+    <div class="text-center mb-6">
+      <div class="w-14 h-14 rounded-2xl bg-cyan-400/20 flex items-center justify-center mx-auto mb-3">
+        <svg class="w-7 h-7 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      </div>
+      <h2 class="font-display font-bold text-xl gradient-text">🎉 Payment Successful!</h2>
+      <p class="text-slate-400 text-sm mt-1">Create your account to access Pro from any device</p>
+    </div>
+    <div class="space-y-3 mb-4">
+      <div class="glass rounded-2xl p-3 flex items-center gap-3" style="border:1px solid rgba(34,211,238,0.2)">
+        <svg class="w-4 h-4 text-cyan-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+        <input id="set-email" type="email" placeholder="your@email.com (used for payment)"
+          class="bg-transparent flex-1 text-sm outline-none text-slate-200 placeholder-slate-500" />
+      </div>
+      <div class="glass rounded-2xl p-3 flex items-center gap-3" style="border:1px solid rgba(34,211,238,0.2)">
+        <svg class="w-4 h-4 text-cyan-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <input id="set-password" type="password" placeholder="Choose a password (min 6 chars)"
+          class="bg-transparent flex-1 text-sm outline-none text-slate-200 placeholder-slate-500" />
+      </div>
+      <div class="glass rounded-2xl p-3 flex items-center gap-3" style="border:1px solid rgba(34,211,238,0.2)">
+        <svg class="w-4 h-4 text-cyan-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <input id="set-password-confirm" type="password" placeholder="Confirm password"
+          class="bg-transparent flex-1 text-sm outline-none text-slate-200 placeholder-slate-500" />
+      </div>
+    </div>
+    <button onclick="registerAccount()" id="register-btn" class="btn-neon w-full rounded-xl py-3 font-display font-bold text-sm mb-3">
+      Create Account & Unlock Pro
+    </button>
+    <p class="text-center text-xs text-slate-500">You'll use this email + password to log in on any device</p>
+  </div>
+</div>
+
+<!-- Account Modal — login + info -->
 <div id="account-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.85);backdrop-filter:blur(8px)">
   <div class="glass rounded-3xl p-8 max-w-md w-full relative" style="border:1px solid rgba(251,191,36,0.3)">
     <button onclick="document.getElementById('account-modal').classList.add('hidden')"
@@ -1877,29 +1916,42 @@ document.addEventListener('DOMContentLoaded', () => {
       <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
 
-    <div class="text-center mb-6">
-      <div class="w-14 h-14 rounded-2xl bg-yellow-400/20 flex items-center justify-center mx-auto mb-3">
-        <svg class="w-7 h-7 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <!-- Login form -->
+    <div id="account-login-form">
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 rounded-2xl bg-yellow-400/20 flex items-center justify-center mx-auto mb-3">
+          <svg class="w-7 h-7 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <h2 class="font-display font-bold text-xl gradient-text">My Account</h2>
+        <p class="text-slate-400 text-sm mt-1">Log in to manage your Pro subscription</p>
       </div>
-      <h2 class="font-display font-bold text-xl gradient-text">My Account</h2>
-      <p class="text-slate-400 text-sm mt-1">Enter your email to view subscription details</p>
-    </div>
-
-    <!-- Email input state -->
-    <div id="account-email-form">
-      <div class="glass rounded-2xl p-3 flex items-center gap-3 mb-4" style="border:1px solid rgba(251,191,36,0.2)">
-        <svg class="w-4 h-4 text-yellow-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
-        <input id="account-email-input" type="email" placeholder="your@email.com"
-          class="bg-transparent flex-1 text-sm outline-none text-slate-200 placeholder-slate-500" />
+      <div class="space-y-3 mb-4">
+        <div class="glass rounded-2xl p-3 flex items-center gap-3" style="border:1px solid rgba(251,191,36,0.2)">
+          <svg class="w-4 h-4 text-yellow-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+          <input id="login-email" type="email" placeholder="your@email.com"
+            class="bg-transparent flex-1 text-sm outline-none text-slate-200 placeholder-slate-500" />
+        </div>
+        <div class="glass rounded-2xl p-3 flex items-center gap-3" style="border:1px solid rgba(251,191,36,0.2)">
+          <svg class="w-4 h-4 text-yellow-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <input id="login-password" type="password" placeholder="Your password"
+            class="bg-transparent flex-1 text-sm outline-none text-slate-200 placeholder-slate-500" />
+        </div>
       </div>
-      <button onclick="lookupAccount()" class="btn-neon w-full rounded-xl py-3 font-display font-bold text-sm">
-        Look Up My Account
+      <button onclick="loginAccount()" id="login-btn" class="btn-neon w-full rounded-xl py-3 font-display font-bold text-sm">
+        Log In
       </button>
     </div>
 
-    <!-- Account info state (hidden initially) -->
+    <!-- Account info (after login) -->
     <div id="account-info" class="hidden">
-      <div class="space-y-3 mb-6">
+      <div class="text-center mb-5">
+        <div class="w-14 h-14 rounded-2xl bg-yellow-400/20 flex items-center justify-center mx-auto mb-3">
+          <svg class="w-7 h-7 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <h2 class="font-display font-bold text-xl gradient-text">My Account</h2>
+        <p id="account-email-display" class="text-slate-400 text-xs mt-1"></p>
+      </div>
+      <div class="space-y-3 mb-5">
         <div class="glass rounded-2xl p-4 flex items-center justify-between">
           <span class="text-sm text-slate-400">Plan</span>
           <span id="account-plan" class="font-bold text-yellow-400"></span>
@@ -1913,44 +1965,128 @@ document.addEventListener('DOMContentLoaded', () => {
           <span id="account-renewal" class="font-bold text-slate-200"></span>
         </div>
         <div id="account-cancel-warning" class="hidden glass rounded-2xl p-3 border border-orange-400/30">
-          <span class="text-xs text-orange-400">⚠ Your subscription will not renew — access ends on the date above</span>
+          <span class="text-xs text-orange-400">⚠ Subscription cancelled — access ends on date above</span>
         </div>
       </div>
       <button onclick="openCustomerPortal()" class="btn-neon w-full rounded-xl py-3 font-display font-bold text-sm mb-3">
         Manage Subscription →
       </button>
-      <button onclick="document.getElementById('account-info').classList.add('hidden');document.getElementById('account-email-form').classList.remove('hidden')"
-        class="w-full text-xs text-slate-500 hover:text-slate-300 py-2">
-        Use a different email
+      <button onclick="showChangePassword()" class="w-full glass rounded-xl py-3 font-display font-bold text-sm mb-3 text-slate-300">
+        Change Password
+      </button>
+      <button onclick="logoutAccount()" class="w-full text-xs text-red-400 hover:text-red-300 py-2">
+        Log Out
+      </button>
+    </div>
+
+    <!-- Change password form -->
+    <div id="account-change-password" class="hidden">
+      <div class="text-center mb-5">
+        <h2 class="font-display font-bold text-xl gradient-text">Change Password</h2>
+      </div>
+      <div class="space-y-3 mb-4">
+        <div class="glass rounded-2xl p-3 flex items-center gap-3" style="border:1px solid rgba(251,191,36,0.2)">
+          <input id="new-password" type="password" placeholder="New password (min 6 chars)"
+            class="bg-transparent flex-1 text-sm outline-none text-slate-200 placeholder-slate-500" />
+        </div>
+        <div class="glass rounded-2xl p-3 flex items-center gap-3" style="border:1px solid rgba(251,191,36,0.2)">
+          <input id="new-password-confirm" type="password" placeholder="Confirm new password"
+            class="bg-transparent flex-1 text-sm outline-none text-slate-200 placeholder-slate-500" />
+        </div>
+      </div>
+      <button onclick="changePassword()" class="btn-neon w-full rounded-xl py-3 font-display font-bold text-sm mb-3">
+        Update Password
+      </button>
+      <button onclick="document.getElementById('account-change-password').classList.add('hidden');document.getElementById('account-info').classList.remove('hidden')"
+        class="w-full text-xs text-slate-500 hover:text-slate-300 py-2">← Back
       </button>
     </div>
 
     <div id="account-loading" class="hidden text-center py-4">
       <div class="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-      <p class="text-sm text-slate-400">Looking up your account...</p>
+      <p class="text-sm text-slate-400">Please wait...</p>
     </div>
   </div>
 </div>
 
 <script>
-let accountEmail = '';
+let accountSessionToken = localStorage.getItem('ams_session_token') || '';
+let pendingSessionId = '';
 
 function showAccountModal() {
   document.getElementById('account-modal').classList.remove('hidden');
-  document.getElementById('account-email-form').classList.remove('hidden');
-  document.getElementById('account-info').classList.add('hidden');
   document.getElementById('account-loading').classList.add('hidden');
-  setTimeout(() => document.getElementById('account-email-input').focus(), 100);
+  document.getElementById('account-change-password').classList.add('hidden');
+  // If already have a session token, verify and show info
+  if (accountSessionToken) {
+    verifyAndShowAccount();
+  } else {
+    document.getElementById('account-login-form').classList.remove('hidden');
+    document.getElementById('account-info').classList.add('hidden');
+    setTimeout(() => document.getElementById('login-email').focus(), 100);
+  }
 }
 
-async function lookupAccount() {
-  const email = document.getElementById('account-email-input').value.trim();
-  if (!email || !email.includes('@')) { notify('Please enter a valid email'); return; }
-  accountEmail = email;
-
-  document.getElementById('account-email-form').classList.add('hidden');
+async function verifyAndShowAccount() {
+  document.getElementById('account-login-form').classList.add('hidden');
+  document.getElementById('account-info').classList.add('hidden');
   document.getElementById('account-loading').classList.remove('hidden');
+  try {
+    const resp = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'verify-token', token: accountSessionToken })
+    });
+    const data = await resp.json();
+    document.getElementById('account-loading').classList.add('hidden');
+    if (data.valid) {
+      await loadAccountInfo(data.email, data.plan);
+    } else {
+      accountSessionToken = '';
+      localStorage.removeItem('ams_session_token');
+      document.getElementById('account-login-form').classList.remove('hidden');
+    }
+  } catch (err) {
+    document.getElementById('account-loading').classList.add('hidden');
+    document.getElementById('account-login-form').classList.remove('hidden');
+  }
+}
 
+async function loginAccount() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) { notify('Please enter email and password'); return; }
+
+  const btn = document.getElementById('login-btn');
+  btn.textContent = 'Logging in...'; btn.disabled = true;
+
+  try {
+    const resp = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await resp.json();
+    btn.textContent = 'Log In'; btn.disabled = false;
+
+    if (!resp.ok) { notify(data.error || 'Login failed'); return; }
+
+    accountSessionToken = data.token;
+    localStorage.setItem('ams_session_token', data.token);
+    unlockApp(); updateNavStatus();
+    document.getElementById('account-login-form').classList.add('hidden');
+    await loadAccountInfo(data.email, data.plan);
+  } catch (err) {
+    btn.textContent = 'Log In'; btn.disabled = false;
+    notify('Login error');
+  }
+}
+
+async function loadAccountInfo(email, plan) {
+  document.getElementById('account-email-display').textContent = email;
+  document.getElementById('account-plan').textContent = (plan === 'monthly' ? 'Monthly' : 'Lifetime') + ' Pro';
+
+  // Fetch subscription details from Stripe
   try {
     const resp = await fetch('/api/account', {
       method: 'POST',
@@ -1958,47 +2094,108 @@ async function lookupAccount() {
       body: JSON.stringify({ action: 'info', email })
     });
     const data = await resp.json();
-    document.getElementById('account-loading').classList.add('hidden');
-
-    if (!resp.ok) {
-      notify(data.error || 'Account not found');
-      document.getElementById('account-email-form').classList.remove('hidden');
-      return;
+    if (resp.ok) {
+      document.getElementById('account-status').textContent = data.status === 'active' ? '✓ Active' : data.status;
+      document.getElementById('account-status').style.color = data.status === 'active' ? '#4ade80' : '#f87171';
+      if (data.plan === 'Lifetime' || !data.currentPeriodEnd) {
+        document.getElementById('account-renewal-row').classList.add('hidden');
+      } else {
+        document.getElementById('account-renewal-row').classList.remove('hidden');
+        const date = new Date(data.currentPeriodEnd * 1000).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+        document.getElementById('account-renewal').textContent = date;
+      }
+      if (data.cancelAtPeriodEnd) {
+        document.getElementById('account-cancel-warning').classList.remove('hidden');
+      } else {
+        document.getElementById('account-cancel-warning').classList.add('hidden');
+      }
     }
+  } catch(e) {
+    document.getElementById('account-status').textContent = '✓ Active';
+    document.getElementById('account-renewal-row').classList.add('hidden');
+  }
+  document.getElementById('account-info').classList.remove('hidden');
+}
 
-    // Populate info
-    document.getElementById('account-plan').textContent = data.plan + ' Pro';
-    document.getElementById('account-status').textContent = data.status === 'active' ? '✓ Active' : data.status;
-    document.getElementById('account-status').style.color = data.status === 'active' ? '#4ade80' : '#f87171';
+async function registerAccount() {
+  const email = document.getElementById('set-email').value.trim();
+  const password = document.getElementById('set-password').value;
+  const confirm = document.getElementById('set-password-confirm').value;
 
-    if (data.plan === 'Lifetime') {
-      document.getElementById('account-renewal-row').classList.add('hidden');
-    } else if (data.currentPeriodEnd) {
-      document.getElementById('account-renewal-row').classList.remove('hidden');
-      const date = new Date(data.currentPeriodEnd * 1000).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
-      document.getElementById('account-renewal').textContent = date;
-    }
+  if (!email || !email.includes('@')) { notify('Please enter a valid email'); return; }
+  if (password.length < 6) { notify('Password must be at least 6 characters'); return; }
+  if (password !== confirm) { notify('Passwords do not match'); return; }
 
-    if (data.cancelAtPeriodEnd) {
-      document.getElementById('account-cancel-warning').classList.remove('hidden');
-    } else {
-      document.getElementById('account-cancel-warning').classList.add('hidden');
-    }
+  const btn = document.getElementById('register-btn');
+  btn.textContent = 'Creating account...'; btn.disabled = true;
 
-    document.getElementById('account-info').classList.remove('hidden');
+  try {
+    const resp = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, session_id: pendingSessionId })
+    });
+    const data = await resp.json();
+    btn.textContent = 'Create Account & Unlock Pro'; btn.disabled = false;
+
+    if (!resp.ok) { notify(data.error || 'Registration failed'); return; }
+
+    accountSessionToken = data.token;
+    localStorage.setItem('ams_session_token', data.token);
+    unlockApp(); updateNavStatus();
+    document.getElementById('set-password-modal').classList.add('hidden');
+    notify('🎉 Account created! You are now Pro on any device.', 5000);
+    addChatMessage('ai', '🎉 Welcome to **AuditMyStore Pro**! Your account is set up. Log in from any device with your email and password. Run unlimited audits anytime!');
   } catch (err) {
-    document.getElementById('account-loading').classList.add('hidden');
-    document.getElementById('account-email-form').classList.remove('hidden');
-    notify('Error looking up account');
+    btn.textContent = 'Create Account & Unlock Pro'; btn.disabled = false;
+    notify('Registration error');
   }
 }
 
+function showChangePassword() {
+  document.getElementById('account-info').classList.add('hidden');
+  document.getElementById('account-change-password').classList.remove('hidden');
+  setTimeout(() => document.getElementById('new-password').focus(), 100);
+}
+
+async function changePassword() {
+  const newPass = document.getElementById('new-password').value;
+  const confirm = document.getElementById('new-password-confirm').value;
+  if (newPass.length < 6) { notify('Password must be at least 6 characters'); return; }
+  if (newPass !== confirm) { notify('Passwords do not match'); return; }
+
+  try {
+    const resp = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'change-password', token: accountSessionToken, newPassword: newPass })
+    });
+    const data = await resp.json();
+    if (!resp.ok) { notify(data.error || 'Failed to change password'); return; }
+    notify('Password updated successfully!');
+    document.getElementById('account-change-password').classList.add('hidden');
+    document.getElementById('account-info').classList.remove('hidden');
+  } catch (err) {
+    notify('Error changing password');
+  }
+}
+
+function logoutAccount() {
+  accountSessionToken = '';
+  localStorage.removeItem('ams_session_token');
+  localStorage.removeItem('ams_unlocked');
+  updateNavStatus();
+  document.getElementById('account-modal').classList.add('hidden');
+  notify('Logged out successfully');
+}
+
 async function openCustomerPortal() {
+  const email = document.getElementById('account-email-display').textContent;
   try {
     const resp = await fetch('/api/account', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'portal', email: accountEmail })
+      body: JSON.stringify({ action: 'portal', email })
     });
     const data = await resp.json();
     if (data.url) window.location.href = data.url;
@@ -2008,10 +2205,23 @@ async function openCustomerPortal() {
   }
 }
 
-// Allow Enter key in email input
+// Handle Enter key on login form
 document.addEventListener('DOMContentLoaded', () => {
-  const emailInput = document.getElementById('account-email-input');
-  if (emailInput) emailInput.addEventListener('keydown', e => { if (e.key === 'Enter') lookupAccount(); });
+  document.getElementById('login-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') loginAccount(); });
+  document.getElementById('login-email')?.addEventListener('keydown', e => { if (e.key === 'Enter') loginAccount(); });
+  document.getElementById('set-password-confirm')?.addEventListener('keydown', e => { if (e.key === 'Enter') registerAccount(); });
+
+  // Auto-restore session on page load
+  if (accountSessionToken) {
+    fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'verify-token', token: accountSessionToken })
+    }).then(r => r.json()).then(data => {
+      if (data.valid) { unlockApp(); updateNavStatus(); }
+      else { accountSessionToken = ''; localStorage.removeItem('ams_session_token'); }
+    }).catch(() => {});
+  }
 });
 </script>
 
