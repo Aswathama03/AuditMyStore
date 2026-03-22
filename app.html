@@ -671,7 +671,8 @@ async function checkUnlockReturn() {
   const unlocked = params.get('unlocked');
   if (!sessionId || !unlocked) return;
   window.history.replaceState({}, '', '/app');
-  if (accountSessionToken) { unlockApp(); updateNavStatus(); return; }
+  // Only skip verification if already a paid user
+  if (accountSessionToken && isUnlocked()) { updateNavStatus(); return; }
   try {
     const resp = await fetch('/api/verify', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({session_id:sessionId}) });
     const data = await resp.json();
@@ -1581,7 +1582,12 @@ document.addEventListener('DOMContentLoaded', () => {
         accountSessionToken = d.token;
         localStorage.setItem('ams_session_token', d.token);
         if (d.name) localStorage.setItem('ams_user_name', d.name);
-        if (d.plan && d.plan !== 'free') unlockApp();
+        // Only unlock if actually a paid plan
+        if (d.plan && d.plan !== 'free') {
+          unlockApp();
+        } else {
+          localStorage.removeItem('ams_unlocked'); // Clear any stale unlock
+        }
         document.getElementById('chat-messages').innerHTML = '';
         const firstName = (d.name || '').split(' ')[0];
         if (d.isNew) {
@@ -1596,7 +1602,11 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(r => r.json()).then(d => {
           if (d.valid) {
             if (d.name) localStorage.setItem('ams_user_name', d.name);
-            if (d.plan && d.plan !== 'free') unlockApp();
+            if (d.plan && d.plan !== 'free') {
+              unlockApp();
+            } else {
+              localStorage.removeItem('ams_unlocked'); // Reset stale unlock for free users
+            }
             document.getElementById('chat-messages').innerHTML = '';
             initChat();
             updateNavStatus();
