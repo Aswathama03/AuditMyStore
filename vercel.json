@@ -11,7 +11,10 @@
     { "src": "api/register.js",         "use": "@vercel/node" },
     { "src": "api/login.js",            "use": "@vercel/node" },
     { "src": "api/forgot-password.js",  "use": "@vercel/node" },
-    { "src": "*.html",                  "use": "@vercel/static" }
+    { "src": "index.html",              "use": "@vercel/static" },
+    { "src": "app.html",                "use": "@vercel/static" },
+    { "src": "login.html",              "use": "@vercel/static" },
+    { "src": "account.html",            "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/auth",            "dest": "/api/auth.js"            },
@@ -25,8 +28,12 @@
     { "src": "/api/login",           "dest": "/api/login.js"           },
     { "src": "/api/forgot-password", "dest": "/api/forgot-password.js" },
     { "src": "/app",                 "dest": "/app.html"               },
+    { "src": "/app.html",            "dest": "/app.html"               },
     { "src": "/login",               "dest": "/login.html"             },
+    { "src": "/login.html",          "dest": "/login.html"             },
     { "src": "/account",             "dest": "/account.html"           },
+    { "src": "/account.html",        "dest": "/account.html"           },
     { "src": "/",                    "dest": "/index.html"             }
   ]
 }
+
