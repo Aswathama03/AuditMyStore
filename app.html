@@ -341,7 +341,7 @@ canvas{max-width:100%}
           <div style="display:flex;align-items:flex-start;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--teal);margin-top:4px;flex-shrink:0"></div><div><div style="font-size:12px;font-weight:700;color:var(--text2)">Health Score</div><div style="font-size:11px;color:var(--text3);font-weight:500">0–100 rating across 6 categories</div></div></div>
           <div style="display:flex;align-items:flex-start;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--green);margin-top:4px;flex-shrink:0"></div><div><div style="font-size:12px;font-weight:700;color:var(--text2)">Revenue Gaps</div><div style="font-size:11px;color:var(--text3);font-weight:500">Exact $ you're leaving on the table</div></div></div>
           <div style="display:flex;align-items:flex-start;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--orange);margin-top:4px;flex-shrink:0"></div><div><div style="font-size:12px;font-weight:700;color:var(--text2)">Quick Wins</div><div style="font-size:11px;color:var(--text3);font-weight:500">Actions you can take today under 2h</div></div></div>
-          <div style="display:flex;align-items:flex-start;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--indigo);margin-top:4px;flex-shrink:0"></div><div><div style="font-size:12px;font-weight:700;color:var(--text2)">AI Chat</div><div style="font-size:11px;color:var(--text3);font-weight:500">Ask Aria anything about your store</div></div></div>
+          <div style="display:flex;align-items:flex-start;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--indigo);margin-top:4px;flex-shrink:0"></div><div><div style="font-size:12px;font-weight:700;color:var(--text2)">AI Chat</div><div style="font-size:11px;color:var(--text3);font-weight:500">Ask Debbie anything about your store</div></div></div>
         </div>
       </div>
     </div>
@@ -465,7 +465,7 @@ canvas{max-width:100%}
   <div class="chat-panel" id="chat-panel">
     <div class="chat-header">
       <div>
-        <div class="chat-title">Aria — AI Consultant</div>
+        <div class="chat-title">Debbie — AI Consultant</div>
         <div style="font-size:11px;color:var(--text3);font-weight:500;margin-top:1px">AuditMyStore</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
@@ -475,7 +475,7 @@ canvas{max-width:100%}
     </div>
     <div class="chat-messages" id="chat-messages"></div>
     <div class="chat-input-area">
-      <input id="chat-input" class="chat-input" type="text" placeholder="Ask Aria anything..." onkeydown="if(event.key==='Enter')sendChat()"/>
+      <input id="chat-input" class="chat-input" type="text" placeholder="Ask Debbie anything..." onkeydown="if(event.key==='Enter')sendChat()"/>
       <button class="chat-send" onclick="sendChat()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
@@ -717,7 +717,7 @@ function addChatMessage(role, text) {
 function clearChat() { chatHistory = []; document.getElementById('chat-messages').innerHTML = ''; initChat(); }
 
 function initChat() {
-  addChatMessage('ai', "👋 Hi! I'm **Aria**, your AI Shopify consultant. Enter a store URL to get started, or ask me anything about growing your Shopify store!");
+  addChatMessage('ai', "👋 Hi! I'm **Debbie**, your AI Shopify consultant. Enter a store URL to get started, or ask me anything about growing your Shopify store!");
 }
 
 async function sendChat() {
@@ -727,8 +727,8 @@ async function sendChat() {
   input.value = '';
   addChatMessage('user', msg);
   const systemPrompt = storeData
-    ? `You are Aria, an expert Shopify consultant for AuditMyStore. The user is analyzing: ${storeData.storeUrl}. Score: ${storeData.score}/100. Revenue: ${storeData.monthlyRevenue}/mo. Key issues: ${storeData.issues?.map(i=>i.title).join(', ')}. Be specific, actionable, and reference their actual data.`
-    : 'You are Aria, an expert Shopify consultant for AuditMyStore. Help users improve their Shopify stores with specific, actionable advice.';
+    ? `You are Debbie, an expert Shopify consultant for AuditMyStore. The user is analyzing: ${storeData.storeUrl}. Score: ${storeData.score}/100. Revenue: ${storeData.monthlyRevenue}/mo. Key issues: ${storeData.issues?.map(i=>i.title).join(', ')}. Be specific, actionable, and reference their actual data.`
+    : 'You are Debbie, an expert Shopify consultant for AuditMyStore. Help users improve their Shopify stores with specific, actionable advice.';
   try {
     const resp = await fetch(API_BASE, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ messages:chatHistory.slice(-10), system:systemPrompt }) });
     const data = await resp.json();
