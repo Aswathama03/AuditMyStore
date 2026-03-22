@@ -126,7 +126,7 @@ h2{font-size:clamp(26px,3.5vw,42px);letter-spacing:-.3px;color:var(--ink);line-h
 .step-card p{font-size:14px;color:var(--ink3);line-height:1.6;font-weight:500}
 
 /* DEBBIE SECTION */
-.debbie-section{background:linear-gradient(135deg,var(--ink) 0%,#1e293b 100%);position:relative;overflow:hidden}
+.debbie-section{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);position:relative;overflow:hidden}
 [data-theme="dark"] .debbie-section{background:linear-gradient(135deg,#0a0f1e 0%,#0f172a 100%)}
 .debbie-section::before{content:'';position:absolute;top:-30%;right:-10%;width:50%;height:150%;background:radial-gradient(ellipse,rgba(249,115,22,.1) 0%,transparent 65%);pointer-events:none}
 .debbie-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
@@ -169,12 +169,14 @@ h2{font-size:clamp(26px,3.5vw,42px);letter-spacing:-.3px;color:var(--ink);line-h
 
 /* TESTIMONIALS */
 .testimonials-section{background:#0f172a;padding:88px 24px}
-[data-theme="light"] .testimonials-section{background:#1e293b}
+[data-theme="light"] .testimonials-section{background:#0f172a}
+.testimonials-section .sec-lbl{color:var(--orange)!important}
+.testimonials-section h2{color:white!important}
 .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 @media(max-width:768px){.tgrid{grid-template-columns:1fr}}
-.tcard{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);padding:24px;transition:all .2s;position:relative;overflow:hidden}
-.tcard::after{content:'❝';position:absolute;top:-10px;right:16px;font-size:60px;color:rgba(249,115,22,.12);line-height:1}
-.tcard:hover{background:rgba(255,255,255,.1);transform:translateY(-3px)}
+.tcard{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);padding:24px;transition:transform .2s,background .2s;position:relative;overflow:hidden}
+.tcard::after{content:'❝';position:absolute;top:-10px;right:16px;font-size:60px;color:rgba(249,115,22,.15);line-height:1}
+.tcard:hover{background:rgba(255,255,255,.11);transform:translateY(-3px)}
 .stars{color:#fbbf24;font-size:13px;margin-bottom:12px;letter-spacing:2px}
 .ttext{font-size:13px;color:rgba(255,255,255,.8);line-height:1.7;margin-bottom:16px;font-style:italic;font-weight:500;position:relative;z-index:1}
 .tauthor{display:flex;align-items:center;gap:10px}
@@ -239,9 +241,11 @@ footer{background:var(--paper2);border-top:1px solid var(--paper4);padding:48px 
 .ft-links a:hover{color:var(--orange)}
 .ft-copy{font-size:12px;color:var(--ink4);margin-top:10px;font-weight:500}
 
-/* ANIMATIONS */
+/* ANIMATIONS — only animate elements below the fold */
 .fade-up{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease}
 .fade-up.visible{opacity:1;transform:none}
+/* Always show testimonials regardless of scroll state */
+.tcard{opacity:1!important;transform:none!important}
 
 /* ILLUSTRATION ELEMENTS */
 .ill-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px}
@@ -521,7 +525,7 @@ footer{background:var(--paper2);border-top:1px solid var(--paper4);padding:48px 
       <h2 style="color:white">Store Owners Love It</h2>
     </div>
     <div class="tgrid">
-      <div class="tcard fade-up">
+      <div class="tcard">
         <div class="stars">★★★★★</div>
         <p class="ttext">"Found 3 critical issues in 60 seconds that I'd been missing for months. Fixed them over a weekend and saw a 23% jump in conversion rate."</p>
         <div class="tauthor">
@@ -530,7 +534,7 @@ footer{background:var(--paper2);border-top:1px solid var(--paper4);padding:48px 
         </div>
         <div class="result-pill">📈 +23% conversion</div>
       </div>
-      <div class="tcard fade-up" style="transition-delay:.12s">
+      <div class="tcard" style="transition-delay:.12s">
         <div class="stars">★★★★★</div>
         <p class="ttext">"The revenue gap analysis was eye-opening. I was losing $8,400/month just from a broken checkout flow. Debbie walked me through fixing it in one afternoon."</p>
         <div class="tauthor">
@@ -539,7 +543,7 @@ footer{background:var(--paper2);border-top:1px solid var(--paper4);padding:48px 
         </div>
         <div class="result-pill">💰 +$8,400/mo recovered</div>
       </div>
-      <div class="tcard fade-up" style="transition-delay:.24s">
+      <div class="tcard" style="transition-delay:.24s">
         <div class="stars">★★★★★</div>
         <p class="ttext">"I use it on every client store. Debbie's chat is like having a senior Shopify consultant on call 24/7. The 90-day blueprint alone is worth the price."</p>
         <div class="tauthor">
@@ -692,4 +696,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(b)b.textContent=t==='dark'?'☀️':'🌙';
 });
 const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible')})},{threshold:.1});
-document.querySelectorAll('
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+setTimeout(()=>{document.querySelectorAll('.fade-up').forEach(el=>{const r=el.getBoundingClientRect();if(r.top<window.innerHeight)el.classList.add('visible')})},100);
+setTimeout(()=>document.querySelector('.hero-visual')?.classList.add('visible'),400);
+</script>
+</body>
+</html>
