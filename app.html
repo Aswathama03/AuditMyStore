@@ -203,7 +203,7 @@ canvas{max-width:100%}
     </div>
     <!-- Logged OUT state -->
     <a href="login.html" id="nav-login-btn" class="nav-btn" style="text-decoration:none">Log In</a>
-    <a href="login.html?tab=signup" id="nav-signup-btn" style="background:linear-gradient(135deg,var(--orange-d),var(--orange));color:white;border:none;border-radius:9px;padding:8px 16px;font-size:14px;font-weight:700;text-decoration:none;font-family:'Quicksand',sans-serif;cursor:pointer">Sign Up Free</a>
+    <a href="login.html?tab=signup" id="nav-signup-btn" style="background:linear-gradient(135deg,var(--orange-d),var(--orange));color:white;border:none;border-radius:9px;padding:8px 16px;font-size:14px;font-weight:700;text-decoration:none;font-family:'Quicksand',sans-serif;cursor:pointer">Sign Up</a>
     <!-- Logged IN state — hidden by default -->
     <div id="user-info" style="display:none;align-items:center;gap:8px">
       <div id="user-avatar" style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--orange-d),var(--orange));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0"></div>
@@ -1563,53 +1563,68 @@ async function exportPDF() {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Restore theme
+  // 1. Restore theme
   const savedTheme = localStorage.getItem('ams_theme') || 'dark';
   isDark = savedTheme === 'dark';
   if (!isDark) document.body.classList.add('light-mode');
 
-  initChat();
-  checkOAuthReturn();
-  checkUnlockReturn();
-
-  // Handle Google OAuth return — must run BEFORE updateNavStatus
+  // 2. Handle Google OAuth return FIRST — save token & name before anything else
   const urlParams = new URLSearchParams(window.location.search);
-  const sessionToken = urlParams.get('session_token');
-  const userName = urlParams.get('name');
-  const userPlan = urlParams.get('plan');
-  const isNew = urlParams.get('new') === '1';
+  const gToken = urlParams.get('session_token');
+  const gName = urlParams.get('name');
+  const gPlan = urlParams.get('plan');
+  const gNew = urlParams.get('new') === '1';
 
-  if (sessionToken) {
-    accountSessionToken = sessionToken;
-    localStorage.setItem('ams_session_token', sessionToken);
-    if (userName) localStorage.setItem('ams_user_name', decodeURIComponent(userName));
-    if (userPlan && userPlan !== 'free') {
-      unlockApp();
-    }
+  if (gToken) {
+    accountSessionToken = gToken;
+    localStorage.setItem('ams_session_token', gToken);
+    if (gName) localStorage.setItem('ams_user_name', decodeURIComponent(gName));
+    if (gPlan && gPlan !== 'free') unlockApp();
     window.history.replaceState({}, '', '/app');
-    const firstName = userName ? decodeURIComponent(userName).split(' ')[0] : 'there';
-    if (isNew) {
-      setTimeout(() => addChatMessage('ai', `🎉 Welcome to AuditMyStore, **${firstName}**! I'm Debbie, your AI Shopify consultant. Enter a store URL above to run your first free analysis!`), 500);
-    } else {
-      setTimeout(() => addChatMessage('ai', `👋 Welcome back, **${firstName}**! Ready to audit another store?`), 500);
-    }
   }
 
-  // Now update nav — name is already in localStorage
+  // 3. Handle Shopify OAuth return
+  checkOAuthReturn();
+
+  // 4. Handle Stripe unlock return
+  checkUnlockReturn();
+
+  // 5. Now init chat — name is in localStorage if logged in
+  initChat();
+
+  // 6. Update nav with correct state
   updateNavStatus();
 
-  // Restore session on load (for returning visitors)
-  if (accountSessionToken && !sessionToken) {
+  // 7. Greet by name after login (Google OAuth)
+  if (gToken && gName) {
+    const firstName = decodeURIComponent(gName).split(' ')[0];
+    setTimeout(() => {
+      document.getElementById('chat-messages').innerHTML = '';
+      if (gNew) {
+        addChatMessage('ai', '🎉 Welcome to AuditMyStore, **' + firstName + '**! I\'m **Debbie**, your AI Shopify consultant. Paste a store URL above to run your first free analysis!');
+      } else {
+        addChatMessage('ai', '👋 Welcome back, **' + firstName + '**! Ready to audit another store? Paste a URL above or use the quick actions to the right.');
+      }
+    }, 200);
+  }
+
+  // 8. Verify existing session for returning visitors (not fresh from OAuth)
+  if (accountSessionToken && !gToken) {
     fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'verify-token', token:accountSessionToken}) })
     .then(r => r.json()).then(d => {
       if (d.valid) {
         if (d.name) localStorage.setItem('ams_user_name', d.name);
         if (d.plan && d.plan !== 'free') unlockApp();
+        // Re-init chat with name now that we have it
+        document.getElementById('chat-messages').innerHTML = '';
+        initChat();
         updateNavStatus();
       } else {
         accountSessionToken = '';
         localStorage.removeItem('ams_session_token');
         localStorage.removeItem('ams_user_name');
+        document.getElementById('chat-messages').innerHTML = '';
+        initChat();
         updateNavStatus();
       }
     }).catch(() => {});
