@@ -21,12 +21,12 @@ export default async function handler(req, res) {
     if (action === 'verify-token') {
       if (!token) return res.status(400).json({ valid: false });
       const rows = await sql`
-        SELECT u.email, u.plan FROM ams_sessions s
+        SELECT u.email, u.plan, u.name FROM ams_sessions s
         JOIN ams_users u ON s.email = u.email
         WHERE s.token = ${token}
       `;
       if (rows.length === 0) return res.status(200).json({ valid: false });
-      return res.status(200).json({ valid: true, email: rows[0].email, plan: rows[0].plan });
+      return res.status(200).json({ valid: true, email: rows[0].email, plan: rows[0].plan, name: rows[0].name || rows[0].email.split('@')[0] });
     }
 
     // Change password
@@ -66,7 +66,7 @@ export default async function handler(req, res) {
     const newToken = crypto.randomBytes(32).toString('hex');
     await sql`INSERT INTO ams_sessions (token, email) VALUES (${newToken}, ${email.toLowerCase()})`;
 
-    return res.status(200).json({ success: true, token: newToken, plan: user.plan, email: user.email });
+    return res.status(200).json({ success: true, token: newToken, plan: user.plan, email: user.email, name: user.name || user.email.split('@')[0] });
   } catch (err) {
     console.error('Login error:', err);
     return res.status(500).json({ error: err.message });

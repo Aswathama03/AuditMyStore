@@ -1,25 +1,42 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/*.js", "use": "@vercel/node" },
-    { "src": "*.html",   "use": "@vercel/static" }
+    { "src": "api/auth.js",                 "use": "@vercel/node" },
+    { "src": "api/auth/google.js",          "use": "@vercel/node" },
+    { "src": "api/auth/google/callback.js", "use": "@vercel/node" },
+    { "src": "api/callback.js",             "use": "@vercel/node" },
+    { "src": "api/chat.js",                 "use": "@vercel/node" },
+    { "src": "api/checkout.js",             "use": "@vercel/node" },
+    { "src": "api/webhook.js",              "use": "@vercel/node" },
+    { "src": "api/verify.js",               "use": "@vercel/node" },
+    { "src": "api/account.js",              "use": "@vercel/node" },
+    { "src": "api/register.js",             "use": "@vercel/node" },
+    { "src": "api/login.js",                "use": "@vercel/node" },
+    { "src": "api/forgot-password.js",      "use": "@vercel/node" },
+    { "src": "index.html",                  "use": "@vercel/static" },
+    { "src": "app.html",                    "use": "@vercel/static" },
+    { "src": "login.html",                  "use": "@vercel/static" },
+    { "src": "account.html",                "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/api/auth",            "dest": "/api/auth.js"            },
-    { "src": "/api/callback",        "dest": "/api/callback.js"        },
-    { "src": "/api/chat",            "dest": "/api/chat.js"            },
-    { "src": "/api/checkout",        "dest": "/api/checkout.js"        },
-    { "src": "/api/webhook",         "dest": "/api/webhook.js"         },
-    { "src": "/api/verify",          "dest": "/api/verify.js"          },
-    { "src": "/api/account",         "dest": "/api/account.js"         },
-    { "src": "/api/register",        "dest": "/api/register.js"        },
-    { "src": "/api/login",           "dest": "/api/login.js"           },
-    { "src": "/api/forgot-password", "dest": "/api/forgot-password.js" },
-    { "src": "/app",                 "dest": "/app.html"               },
-    { "src": "/login",               "dest": "/login.html"             },
-    { "src": "/account",             "dest": "/account.html"           },
-    { "src": "/",                    "dest": "/index.html"             }
+    { "src": "/api/auth/google/callback", "dest": "/api/auth/google/callback.js" },
+    { "src": "/api/auth/google",          "dest": "/api/auth/google.js"          },
+    { "src": "/api/auth",                 "dest": "/api/auth.js"                 },
+    { "src": "/api/callback",             "dest": "/api/callback.js"             },
+    { "src": "/api/chat",                 "dest": "/api/chat.js"                 },
+    { "src": "/api/checkout",             "dest": "/api/checkout.js"             },
+    { "src": "/api/webhook",              "dest": "/api/webhook.js"              },
+    { "src": "/api/verify",              "dest": "/api/verify.js"               },
+    { "src": "/api/account",             "dest": "/api/account.js"              },
+    { "src": "/api/register",            "dest": "/api/register.js"             },
+    { "src": "/api/login",               "dest": "/api/login.js"                },
+    { "src": "/api/forgot-password",     "dest": "/api/forgot-password.js"      },
+    { "src": "/app",                     "dest": "/app.html"                    },
+    { "src": "/app.html",                "dest": "/app.html"                    },
+    { "src": "/login",                   "dest": "/login.html"                  },
+    { "src": "/login.html",              "dest": "/login.html"                  },
+    { "src": "/account",                 "dest": "/account.html"                },
+    { "src": "/account.html",            "dest": "/account.html"                },
+    { "src": "/",                        "dest": "/index.html"                  }
   ]
 }
-
-

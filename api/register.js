@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { email, password, session_id } = req.body;
+  const { email, password, session_id, name } = req.body;
   if (!email || !password || !session_id) {
     return res.status(400).json({ error: 'Email, password and session_id required' });
   }
@@ -39,13 +39,15 @@ export default async function handler(req, res) {
   try {
     const sql = await getDb();
 
-    // Verify session exists in ams_licenses
-    const license = await sql`SELECT plan, email FROM ams_licenses WHERE session_id = ${session_id}`;
-    if (license.length === 0) {
-      return res.status(403).json({ error: 'Invalid session — payment not verified' });
+    // Allow direct email signup (free plan) or paid session
+    let plan = 'free';
+    if (session_id !== 'email-signup') {
+      const license = await sql`SELECT plan, email FROM ams_licenses WHERE session_id = ${session_id}`;
+      if (license.length === 0) {
+        return res.status(403).json({ error: 'Invalid session — payment not verified' });
+      }
+      plan = license[0].plan || 'monthly';
     }
-
-    const plan = license[0].plan || 'monthly';
     const passwordHash = hashPassword(password);
 
     // Check if email already registered
@@ -55,8 +57,8 @@ export default async function handler(req, res) {
     }
 
     await sql`
-      INSERT INTO ams_users (email, password_hash, plan, stripe_session_id)
-      VALUES (${email.toLowerCase()}, ${passwordHash}, ${plan}, ${session_id})
+      INSERT INTO ams_users (email, name, password_hash, plan, stripe_session_id)
+      VALUES (${email.toLowerCase()}, ${name || ''}, ${passwordHash}, ${plan}, ${session_id})
     `;
 
     // Generate session token
@@ -70,7 +72,7 @@ export default async function handler(req, res) {
     `;
     await sql`INSERT INTO ams_sessions (token, email) VALUES (${token}, ${email.toLowerCase()})`;
 
-    return res.status(200).json({ success: true, token, plan, email: email.toLowerCase() });
+    return res.status(200).json({ success: true, token, plan, email: email.toLowerCase(), name: name || email.split('@')[0] });
   } catch (err) {
     console.error('Register error:', err);
     return res.status(500).json({ error: err.message });

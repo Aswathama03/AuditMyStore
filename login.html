@@ -4,95 +4,160 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Log In — AuditMyStore</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230891b2'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='11' font-weight='700' font-family='sans-serif'>AMS</text></svg>"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23ea580c'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='11' font-weight='700' font-family='sans-serif'>AMS</text></svg>"/>
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--ink:#0f172a;--ink2:#334155;--ink3:#64748b;--ink4:#94a3b8;--paper:#ffffff;--paper2:#f8fafc;--paper3:#f1f5f9;--paper4:#e2e8f0;--teal:#0891b2;--teal-l:#e0f2fe;--teal-d:#0e7490;--green:#059669;--red:#dc2626;--radius:14px;--shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 16px rgba(0,0,0,0.06);--shadow-lg:0 8px 32px rgba(0,0,0,0.1)}
-[data-theme="dark"]{--ink:#f1f5f9;--ink2:#cbd5e1;--ink3:#94a3b8;--ink4:#64748b;--paper:#0f172a;--paper2:#1e293b;--paper3:#253347;--paper4:#334155;--teal:#22d3ee;--teal-l:rgba(34,211,238,0.12);--teal-d:#06b6d4;--green:#4ade80;--shadow:0 1px 3px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.2);--shadow-lg:0 8px 32px rgba(0,0,0,.4)}
+:root{
+  --ink:#0f172a;--ink2:#334155;--ink3:#64748b;--ink4:#94a3b8;
+  --paper:#ffffff;--paper2:#f8fafc;--paper3:#f1f5f9;--paper4:#e2e8f0;
+  --orange:#f97316;--orange-l:#fff7ed;--orange-d:#ea580c;
+  --teal:#0891b2;--green:#059669;--red:#dc2626;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg:0 8px 40px rgba(0,0,0,.12);
+}
+[data-theme="dark"]{
+  --ink:#f1f5f9;--ink2:#cbd5e1;--ink3:#94a3b8;--ink4:#64748b;
+  --paper:#0f172a;--paper2:#1e293b;--paper3:#253347;--paper4:#334155;
+  --orange:#fb923c;--orange-l:rgba(251,146,60,.12);--orange-d:#ea580c;
+  --shadow:0 1px 3px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.2);
+  --shadow-lg:0 8px 40px rgba(0,0,0,.5);
+}
+html,body{height:100%}
 body{font-family:'Quicksand',sans-serif;background:var(--paper2);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;transition:background .3s,color .3s}
+
+/* NAV */
 nav{background:var(--paper);border-bottom:1px solid var(--paper4);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;transition:background .3s}
 .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo{width:36px;height:36px;background:var(--teal);border-radius:9px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:12px}
+.nav-logo{width:36px;height:36px;background:linear-gradient(135deg,var(--orange-d),var(--orange));border-radius:9px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:12px;box-shadow:0 2px 8px rgba(249,115,22,.3)}
 .nav-name{font-size:18px;font-weight:700;color:var(--ink)}
 .nav-r{display:flex;align-items:center;gap:10px}
-.back-link{font-size:14px;color:var(--ink3);text-decoration:none;font-weight:600;padding:8px 12px;border-radius:8px;transition:all .15s}
-.back-link:hover{background:var(--paper3);color:var(--ink)}
-.theme-btn{width:38px;height:38px;border-radius:10px;border:1.5px solid var(--paper4);background:var(--paper2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:all .15s}
-.theme-btn:hover{background:var(--paper3);border-color:var(--teal)}
-main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 24px}
-.card{background:var(--paper);border:1px solid var(--paper4);border-radius:24px;padding:44px;width:100%;max-width:420px;box-shadow:var(--shadow-lg)}
-.card-ico{width:56px;height:56px;background:var(--teal-l);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:26px}
-.card-title{font-size:26px;font-weight:700;color:var(--ink);text-align:center;letter-spacing:-.3px;margin-bottom:6px}
+.nav-link{font-size:14px;color:var(--ink3);text-decoration:none;font-weight:600;padding:8px 14px;border-radius:8px;transition:all .15s}
+.nav-link:hover{background:var(--paper3);color:var(--ink)}
+.theme-btn{width:36px;height:36px;border-radius:9px;border:1.5px solid var(--paper4);background:var(--paper2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s}
+.theme-btn:hover{border-color:var(--orange)}
+
+/* MAIN LAYOUT */
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 24px;position:relative;overflow:hidden}
+main::before{content:'';position:absolute;top:-20%;left:-10%;width:50%;height:80%;background:radial-gradient(ellipse,rgba(249,115,22,.06) 0%,transparent 65%);pointer-events:none}
+main::after{content:'';position:absolute;bottom:-20%;right:-10%;width:40%;height:70%;background:radial-gradient(ellipse,rgba(8,145,178,.05) 0%,transparent 65%);pointer-events:none}
+
+/* CARD */
+.card{background:var(--paper);border:1px solid var(--paper4);border-radius:24px;padding:40px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);position:relative;z-index:1}
+.card-top{position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--orange-d),var(--orange),var(--teal));border-radius:24px 24px 0 0}
+.card-icon{width:52px;height:52px;background:var(--orange-l);border-radius:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:24px}
+.card-title{font-size:24px;font-weight:700;color:var(--ink);text-align:center;letter-spacing:-.3px;margin-bottom:5px}
 .card-sub{font-size:14px;color:var(--ink3);text-align:center;margin-bottom:28px;font-weight:500}
-.form-lbl{display:block;font-size:13px;font-weight:700;color:var(--ink2);margin-bottom:5px}
-.form-row{margin-bottom:14px}
-.lbl-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
-.input{width:100%;padding:11px 14px;border:1.5px solid var(--paper4);border-radius:10px;font-size:14px;color:var(--ink);background:var(--paper2);transition:all .15s;font-family:'Quicksand',sans-serif;outline:none;font-weight:500}
-.input:focus{border-color:var(--teal);background:var(--paper);box-shadow:0 0 0 3px rgba(8,145,178,.1)}
-.input::placeholder{color:var(--ink4)}
-.btn-sub{width:100%;padding:13px;background:var(--teal);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;font-family:'Quicksand',sans-serif;margin-top:6px}
-.btn-sub:hover{background:var(--teal-d);transform:translateY(-1px);box-shadow:0 4px 12px rgba(8,145,178,.3)}
-.btn-sub:disabled{opacity:.6;cursor:not-allowed;transform:none}
-.link{color:var(--teal);text-decoration:none;font-weight:700;font-size:13px}
-.link:hover{text-decoration:underline}
-.err{background:#fef2f2;border:1px solid #fecaca;color:var(--red);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none;font-weight:500}
-.suc{background:#f0fdf4;border:1px solid #bbf7d0;color:var(--green);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none;font-weight:500}
-.divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--ink4);font-size:13px;font-weight:500}
+
+/* GOOGLE BTN */
+.btn-google{width:100%;padding:13px;border:1.5px solid var(--paper4);border-radius:11px;background:var(--paper);color:var(--ink);font-family:'Quicksand',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .15s;margin-bottom:20px}
+.btn-google:hover{border-color:var(--orange);background:var(--orange-l);transform:translateY(-1px);box-shadow:0 4px 12px rgba(249,115,22,.15)}
+.google-icon{width:20px;height:20px;flex-shrink:0}
+
+/* DIVIDER */
+.divider{display:flex;align-items:center;gap:12px;margin-bottom:20px}
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--paper4)}
-.tc{text-align:center;font-size:13px;color:var(--ink3);font-weight:500}
+.divider span{font-size:12px;color:var(--ink4);font-weight:600;white-space:nowrap}
+
+/* FORM */
+.form-row{margin-bottom:14px}
+.form-lbl{display:block;font-size:13px;font-weight:700;color:var(--ink2);margin-bottom:5px}
+.lbl-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.input{width:100%;padding:12px 14px;border:1.5px solid var(--paper4);border-radius:10px;font-size:14px;color:var(--ink);background:var(--paper2);transition:all .15s;font-family:'Quicksand',sans-serif;outline:none;font-weight:500}
+.input:focus{border-color:var(--orange);background:var(--paper);box-shadow:0 0 0 3px rgba(249,115,22,.1)}
+.input::placeholder{color:var(--ink4)}
+.btn-sub{width:100%;padding:13px;background:linear-gradient(135deg,var(--orange-d),var(--orange));color:white;border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;transition:all .15s;font-family:'Quicksand',sans-serif;margin-top:4px;box-shadow:0 3px 10px rgba(249,115,22,.3)}
+.btn-sub:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(249,115,22,.4)}
+.btn-sub:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.link{color:var(--orange-d);text-decoration:none;font-weight:700;font-size:13px}
+.link:hover{text-decoration:underline}
+[data-theme="dark"] .link{color:var(--orange)}
+.err{background:#fef2f2;border:1px solid #fecaca;color:var(--red);padding:10px 14px;border-radius:9px;font-size:13px;margin-bottom:14px;display:none;font-weight:500}
+.suc{background:#f0fdf4;border:1px solid #bbf7d0;color:var(--green);padding:10px 14px;border-radius:9px;font-size:13px;margin-bottom:14px;display:none;font-weight:500}
+.tc{text-align:center;font-size:13px;color:var(--ink3);font-weight:500;margin-top:16px}
 .panel{display:none}
 .panel.active{display:block}
 </style>
 </head>
 <body>
+
 <nav>
   <a href="index.html" class="nav-brand">
     <div class="nav-logo">AMS</div>
     <span class="nav-name">AuditMyStore</span>
   </a>
   <div class="nav-r">
-    <a href="app.html" class="back-link">← Back to App</a>
+    <a href="app.html" class="nav-link">← Back to App</a>
     <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
   </div>
 </nav>
 
 <main>
   <div class="card">
+    <div class="card-top"></div>
 
     <!-- LOGIN -->
     <div id="p-login" class="panel active">
-      <div class="card-ico">🔐</div>
+      <div class="card-icon">🔐</div>
       <div class="card-title">Welcome back</div>
-      <div class="card-sub">Log in to your AuditMyStore Pro account</div>
+      <div class="card-sub">Log in to your AuditMyStore account</div>
+
+      <!-- Google -->
+      <button class="btn-google" onclick="loginWithGoogle()">
+        <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="divider"><span>or sign in with email</span></div>
+
       <div id="login-err" class="err"></div>
       <div class="form-row"><label class="form-lbl">Email address</label><input id="login-email" type="email" class="input" placeholder="you@example.com" autocomplete="email"/></div>
       <div class="form-row">
-        <div class="lbl-row"><label class="form-lbl" style="margin:0">Password</label><a href="#" class="link" onclick="show('p-forgot');return false">Forgot password?</a></div>
+        <div class="lbl-row"><label class="form-lbl" style="margin:0">Password</label><a href="#" class="link" onclick="show('p-forgot');return false">Forgot?</a></div>
         <input id="login-pw" type="password" class="input" placeholder="Your password" autocomplete="current-password"/>
       </div>
       <button id="login-btn" class="btn-sub" onclick="doLogin()">Log In</button>
-      <div class="divider">or</div>
-      <div class="tc">Don't have an account? <a href="app.html" class="link">Analyze a store first →</a></div>
+      <div class="tc">Don't have an account? <a href="#" class="link" onclick="show('p-signup');return false">Sign up free</a></div>
+    </div>
+
+    <!-- SIGN UP -->
+    <div id="p-signup" class="panel">
+      <div class="card-icon">✨</div>
+      <div class="card-title">Create account</div>
+      <div class="card-sub">Start with 2 free store audits</div>
+
+      <button class="btn-google" onclick="loginWithGoogle()">
+        <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Sign up with Google
+      </button>
+
+      <div class="divider"><span>or sign up with email</span></div>
+
+      <div id="signup-err" class="err"></div>
+      <div class="form-row"><label class="form-lbl">Full name</label><input id="signup-name" type="text" class="input" placeholder="Your name"/></div>
+      <div class="form-row"><label class="form-lbl">Email address</label><input id="signup-email" type="email" class="input" placeholder="you@example.com"/></div>
+      <div class="form-row"><label class="form-lbl">Password</label><input id="signup-pw" type="password" class="input" placeholder="Min 6 characters"/></div>
+      <button id="signup-btn" class="btn-sub" onclick="doSignup()">Create Account</button>
+      <div class="tc">Already have an account? <a href="#" class="link" onclick="show('p-login');return false">Log in</a></div>
     </div>
 
     <!-- FORGOT -->
     <div id="p-forgot" class="panel">
-      <div class="card-ico">📧</div>
+      <div class="card-icon">📧</div>
       <div class="card-title">Forgot password?</div>
-      <div class="card-sub">Enter your email and we'll send a reset link</div>
+      <div class="card-sub">We'll send a reset link to your email</div>
       <div id="forgot-suc" class="suc"></div>
       <div id="forgot-err" class="err"></div>
       <div class="form-row"><label class="form-lbl">Email address</label><input id="forgot-email" type="email" class="input" placeholder="you@example.com"/></div>
       <button id="forgot-btn" class="btn-sub" onclick="doForgot()">Send Reset Link</button>
-      <div style="margin-top:14px;text-align:center"><a href="#" class="link" onclick="show('p-login');return false">← Back to login</a></div>
+      <div class="tc"><a href="#" class="link" onclick="show('p-login');return false">← Back to login</a></div>
     </div>
 
     <!-- RESET -->
     <div id="p-reset" class="panel">
-      <div class="card-ico">🔑</div>
+      <div class="card-icon">🔑</div>
       <div class="card-title">Set new password</div>
-      <div class="card-sub">Choose a strong password for your account</div>
+      <div class="card-sub">Choose a strong password</div>
       <div id="reset-err" class="err"></div>
       <div class="form-row"><label class="form-lbl">New password</label><input id="reset-pw" type="password" class="input" placeholder="Min 6 characters"/></div>
       <div class="form-row"><label class="form-lbl">Confirm password</label><input id="reset-confirm" type="password" class="input" placeholder="Repeat password"/></div>
@@ -103,77 +168,141 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 
 </main>
 
 <script>
-let resetToken='';
-function show(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active')}
-function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';setTimeout(()=>e.style.display='none',5000)}
-function showSuc(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block'}
-function toggleTheme(){const h=document.documentElement,d=h.getAttribute('data-theme')==='dark';h.setAttribute('data-theme',d?'light':'dark');document.getElementById('theme-btn').textContent=d?'🌙':'☀️';localStorage.setItem('ams_theme',d?'light':'dark')}
-const t=localStorage.getItem('ams_theme')||'light';
-document.documentElement.setAttribute('data-theme',t);
-document.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('theme-btn');if(b)b.textContent=t==='dark'?'☀️':'🌙'});
+let resetToken = '';
 
-async function doLogin(){
-  const email=document.getElementById('login-email').value.trim();
-  const pw=document.getElementById('login-pw').value;
-  if(!email||!pw){showErr('login-err','Please enter email and password');return}
-  const btn=document.getElementById('login-btn');
-  btn.textContent='Logging in...';btn.disabled=true;
-  try{
-    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pw})});
-    const d=await r.json();btn.textContent='Log In';btn.disabled=false;
-    if(!r.ok){showErr('login-err',d.error||'Login failed');return}
-    localStorage.setItem('ams_session_token',d.token);localStorage.setItem('ams_unlocked','1');
-    window.location.href='account.html';
-  }catch(e){btn.textContent='Log In';btn.disabled=false;showErr('login-err','Connection error. Please try again.')}
-}
+// Theme
+const t = localStorage.getItem('ams_theme') || 'light';
+document.documentElement.setAttribute('data-theme', t);
+document.addEventListener('DOMContentLoaded', () => {
+  const b = document.getElementById('theme-btn');
+  if (b) b.textContent = t === 'dark' ? '☀️' : '🌙';
 
-async function doForgot(){
-  const email=document.getElementById('forgot-email').value.trim();
-  if(!email||!email.includes('@')){showErr('forgot-err','Please enter a valid email');return}
-  const btn=document.getElementById('forgot-btn');btn.textContent='Sending...';btn.disabled=true;
-  try{
-    await fetch('/api/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'send',email})});
-    btn.textContent='Send Reset Link';btn.disabled=false;
-    showSuc('forgot-suc','✅ If that email has an account, a reset link has been sent. Check your inbox!');
-    document.getElementById('forgot-email').value='';
-  }catch(e){btn.textContent='Send Reset Link';btn.disabled=false;showErr('forgot-err','Error sending email.')}
-}
+  // Check URL params
+  const params = new URLSearchParams(window.location.search);
 
-async function doReset(){
-  const pw=document.getElementById('reset-pw').value;
-  const c=document.getElementById('reset-confirm').value;
-  if(pw.length<6){showErr('reset-err','Password must be at least 6 characters');return}
-  if(pw!==c){showErr('reset-err','Passwords do not match');return}
-  const btn=document.getElementById('reset-btn');btn.textContent='Saving...';btn.disabled=true;
-  try{
-    const r=await fetch('/api/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'reset',token:resetToken,newPassword:pw})});
-    const d=await r.json();btn.textContent='Set New Password';btn.disabled=false;
-    if(!r.ok){showErr('reset-err',d.error||'Reset failed');return}
-    localStorage.setItem('ams_session_token',d.token);localStorage.setItem('ams_unlocked','1');
-    window.location.href='account.html';
-  }catch(e){btn.textContent='Set New Password';btn.disabled=false;showErr('reset-err','Error. Please try again.')}
-}
-
-document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('login-pw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-  document.getElementById('login-email').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-  document.getElementById('forgot-email').addEventListener('keydown',e=>{if(e.key==='Enter')doForgot()});
-  document.getElementById('reset-confirm').addEventListener('keydown',e=>{if(e.key==='Enter')doReset()});
-  // Check reset token
-  const params=new URLSearchParams(window.location.search);
-  const tok=params.get('reset_token');
-  if(tok){
-    resetToken=tok;window.history.replaceState({},'','/login.html');
-    fetch('/api/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'verify',token:tok})})
-    .then(r=>r.json()).then(d=>{if(d.valid)show('p-reset');else{show('p-forgot');showErr('forgot-err','Reset link expired. Please request a new one.')}});
+  // Handle reset token
+  const tok = params.get('reset_token');
+  if (tok) {
+    resetToken = tok;
+    window.history.replaceState({}, '', '/login.html');
+    fetch('/api/forgot-password', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'verify',token:tok}) })
+      .then(r => r.json()).then(d => { if(d.valid) show('p-reset'); else { show('p-forgot'); showErr('forgot-err','Reset link expired. Please request a new one.'); }});
   }
-  // If already logged in
-  const saved=localStorage.getItem('ams_session_token');
-  if(saved){
-    fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'verify-token',token:saved})})
-    .then(r=>r.json()).then(d=>{if(d.valid)window.location.href='account.html'}).catch(()=>{});
+
+  // Handle errors from Google OAuth
+  const err = params.get('error');
+  if (err === 'google_denied') showErr('login-err', 'Google sign-in was cancelled.');
+  if (err === 'oauth_failed') showErr('login-err', 'Google sign-in failed. Please try again or use email.');
+
+  // Show signup tab if requested
+  if (params.get('tab') === 'signup') show('p-signup');
+
+  // If already logged in, redirect
+  const saved = localStorage.getItem('ams_session_token');
+  if (saved) {
+    fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'verify-token', token:saved}) })
+      .then(r => r.json()).then(d => { if (d.valid) window.location.href = 'app.html'; }).catch(() => {});
   }
+
+  // Enter keys
+  document.getElementById('login-pw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  document.getElementById('signup-pw').addEventListener('keydown', e => { if(e.key==='Enter') doSignup(); });
+  document.getElementById('forgot-email').addEventListener('keydown', e => { if(e.key==='Enter') doForgot(); });
+  document.getElementById('reset-confirm').addEventListener('keydown', e => { if(e.key==='Enter') doReset(); });
 });
+
+function toggleTheme() {
+  const h = document.documentElement, d = h.getAttribute('data-theme') === 'dark';
+  h.setAttribute('data-theme', d ? 'light' : 'dark');
+  document.getElementById('theme-btn').textContent = d ? '🌙' : '☀️';
+  localStorage.setItem('ams_theme', d ? 'light' : 'dark');
+}
+
+function show(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showErr(id, msg) { const e = document.getElementById(id); e.textContent = msg; e.style.display = 'block'; setTimeout(() => e.style.display = 'none', 5000); }
+function showSuc(id, msg) { const e = document.getElementById(id); e.textContent = msg; e.style.display = 'block'; }
+
+function loginWithGoogle() {
+  window.location.href = '/api/auth/google';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  if (!email || !pw) { showErr('login-err', 'Please enter email and password'); return; }
+  const btn = document.getElementById('login-btn');
+  btn.textContent = 'Logging in...'; btn.disabled = true;
+  try {
+    const r = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password:pw}) });
+    const d = await r.json();
+    btn.textContent = 'Log In'; btn.disabled = false;
+    if (!r.ok) { showErr('login-err', d.error || 'Login failed'); return; }
+    localStorage.setItem('ams_session_token', d.token);
+    localStorage.setItem('ams_user_name', d.name || email.split('@')[0]);
+    localStorage.setItem('ams_user_email', email);
+    if (d.plan !== 'free') localStorage.setItem('ams_unlocked', '1');
+    window.location.href = 'app.html';
+  } catch(e) { btn.textContent = 'Log In'; btn.disabled = false; showErr('login-err', 'Connection error. Please try again.'); }
+}
+
+async function doSignup() {
+  const name = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pw = document.getElementById('signup-pw').value;
+  if (!name) { showErr('signup-err', 'Please enter your name'); return; }
+  if (!email || !email.includes('@')) { showErr('signup-err', 'Please enter a valid email'); return; }
+  if (pw.length < 6) { showErr('signup-err', 'Password must be at least 6 characters'); return; }
+  const btn = document.getElementById('signup-btn');
+  btn.textContent = 'Creating account...'; btn.disabled = true;
+  try {
+    // Use register endpoint with a fake session_id for email-signup
+    const r = await fetch('/api/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password:pw, name, session_id:'email-signup'}) });
+    const d = await r.json();
+    btn.textContent = 'Create Account'; btn.disabled = false;
+    if (!r.ok) {
+      if (d.error?.includes('already registered')) { showErr('signup-err', 'Email already registered — please log in instead.'); return; }
+      showErr('signup-err', d.error || 'Signup failed');
+      return;
+    }
+    localStorage.setItem('ams_session_token', d.token);
+    localStorage.setItem('ams_user_name', name);
+    localStorage.setItem('ams_user_email', email);
+    window.location.href = 'app.html?new=1';
+  } catch(e) { btn.textContent = 'Create Account'; btn.disabled = false; showErr('signup-err', 'Connection error. Please try again.'); }
+}
+
+async function doForgot() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email || !email.includes('@')) { showErr('forgot-err', 'Please enter a valid email'); return; }
+  const btn = document.getElementById('forgot-btn');
+  btn.textContent = 'Sending...'; btn.disabled = true;
+  try {
+    await fetch('/api/forgot-password', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'send', email}) });
+    btn.textContent = 'Send Reset Link'; btn.disabled = false;
+    showSuc('forgot-suc', '✅ If that email has an account, a reset link has been sent!');
+  } catch(e) { btn.textContent = 'Send Reset Link'; btn.disabled = false; showErr('forgot-err', 'Error. Please try again.'); }
+}
+
+async function doReset() {
+  const pw = document.getElementById('reset-pw').value;
+  const c = document.getElementById('reset-confirm').value;
+  if (pw.length < 6) { showErr('reset-err', 'Password must be at least 6 characters'); return; }
+  if (pw !== c) { showErr('reset-err', 'Passwords do not match'); return; }
+  const btn = document.getElementById('reset-btn');
+  btn.textContent = 'Saving...'; btn.disabled = true;
+  try {
+    const r = await fetch('/api/forgot-password', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'reset', token:resetToken, newPassword:pw}) });
+    const d = await r.json();
+    btn.textContent = 'Set New Password'; btn.disabled = false;
+    if (!r.ok) { showErr('reset-err', d.error || 'Reset failed'); return; }
+    localStorage.setItem('ams_session_token', d.token);
+    window.location.href = 'app.html';
+  } catch(e) { btn.textContent = 'Set New Password'; btn.disabled = false; showErr('reset-err', 'Error. Please try again.'); }
+}
 </script>
 </body>
 </html>

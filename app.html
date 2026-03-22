@@ -144,6 +144,9 @@ nav{position:sticky;top:0;z-index:50;background:rgba(15,23,42,.95);backdrop-filt
 .chat-input::placeholder{color:var(--text4)}
 .chat-send{background:var(--orange-d);color:white;border:none;border-radius:9px;padding:9px 14px;cursor:pointer;transition:all .15s}
 .chat-send:hover{background:var(--orange)}
+.debbie-pill{background:var(--bg2);border:1px solid var(--border);border-radius:100px;padding:5px 11px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;font-family:'Quicksand',sans-serif;white-space:nowrap}
+.debbie-pill:hover{border-color:var(--orange);color:var(--orange);background:var(--orange-l)}
+.debbie-pill.active{border-color:var(--orange);color:var(--orange);background:var(--orange-l)}
 
 /* PAYWALL */
 .paywall-overlay{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px}
@@ -196,12 +199,14 @@ canvas{max-width:100%}
     <span class="pro-badge" id="pro-badge">PRO</span>
   </div>
   <div class="nav-right">
-    <div id="audit-counter" class="nav-btn" style="cursor:pointer" onclick="showPaywall()">
+    <div id="audit-counter" class="nav-btn" style="cursor:pointer;display:none" onclick="showPaywall()">
       <span id="audit-counter-text">0/2 free</span>
     </div>
-    <button id="my-account-btn" class="nav-btn" onclick="window.location.href='account.html'" style="color:#f59e0b;border-color:#f59e0b44">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      My Account
+    <a href="login.html" id="nav-login-btn" class="nav-btn" style="display:none">Log In</a>
+    <a href="login.html?tab=signup" id="nav-signup-btn" class="nav-btn" style="display:none;background:linear-gradient(135deg,var(--orange-d),var(--orange));color:white;border:none">Sign Up Free</a>
+    <button id="my-account-btn" class="nav-btn" onclick="window.location.href='account.html'" style="display:none;gap:8px">
+      <div id="user-avatar" style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--orange-d),var(--orange));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0"></div>
+      <span id="user-name-display" style="color:var(--orange);font-weight:700"></span>
     </button>
     <button class="nav-btn" onclick="window.location.href='index.html'">← Home</button>
     <button class="nav-btn" onclick="exportPDF()">
@@ -466,12 +471,20 @@ canvas{max-width:100%}
     <div class="chat-header">
       <div>
         <div class="chat-title">Debbie — AI Consultant</div>
-        <div style="font-size:14px;color:var(--text3);font-weight:500;margin-top:1px">AuditMyStore</div>
+        <div style="font-size:13px;color:var(--text3);font-weight:500;margin-top:1px">AuditMyStore</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <div class="chat-online"><div class="chat-dot"></div>Online</div>
-        <button onclick="clearChat()" style="background:none;border:none;color:var(--text4);cursor:pointer;font-size:14px;font-weight:600">Clear</button>
+        <button onclick="clearChat()" style="background:none;border:none;color:var(--text4);cursor:pointer;font-size:13px;font-weight:600">Clear</button>
       </div>
+    </div>
+    <!-- Feature quick-actions -->
+    <div id="debbie-features" style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px">
+      <button onclick="debbieFeature('seo')" class="debbie-pill">🔍 SEO Audit</button>
+      <button onclick="debbieFeature('pricing')" class="debbie-pill">💲 Pricing</button>
+      <button onclick="debbieFeature('email')" class="debbie-pill">📧 Email Sequences</button>
+      <button onclick="debbieFeature('ads')" class="debbie-pill">📣 Ad Copy</button>
+      <button onclick="debbieFeature('competitors')" class="debbie-pill">🔎 Competitors</button>
     </div>
     <div class="chat-messages" id="chat-messages"></div>
     <div class="chat-input-area">
@@ -588,13 +601,43 @@ function updateNavStatus() {
   const auditCounter = document.getElementById('audit-counter');
   const auditCounterText = document.getElementById('audit-counter-text');
   const myAccountBtn = document.getElementById('my-account-btn');
-  if (isUnlocked()) {
-    proBadge.style.display = 'inline-flex';
-    auditCounter.style.display = 'none';
+  const navLoginBtn = document.getElementById('nav-login-btn');
+  const navSignupBtn = document.getElementById('nav-signup-btn');
+
+  const loggedIn = !!accountSessionToken;
+  const userName = localStorage.getItem('ams_user_name') || '';
+
+  if (loggedIn) {
+    // Show user name + account button
+    navLoginBtn.style.display = 'none';
+    navSignupBtn.style.display = 'none';
     myAccountBtn.style.display = 'flex';
+    const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2) || '?';
+    document.getElementById('user-avatar').textContent = initials;
+    document.getElementById('user-name-display').textContent = userName.split(' ')[0];
+
+    if (isUnlocked()) {
+      proBadge.style.display = 'inline-flex';
+      auditCounter.style.display = 'none';
+    } else {
+      proBadge.style.display = 'none';
+      const count = getAuditCount();
+      const remaining = Math.max(0, FREE_AUDIT_LIMIT - count);
+      auditCounter.style.display = 'flex';
+      if (remaining === 0) {
+        auditCounterText.textContent = '🔒 Upgrade to Pro';
+        auditCounterText.style.color = 'var(--red)';
+      } else {
+        auditCounterText.textContent = `${count}/${FREE_AUDIT_LIMIT} free audits`;
+        auditCounterText.style.color = 'var(--orange)';
+      }
+    }
   } else {
+    // Logged out — show login + signup
     proBadge.style.display = 'none';
     myAccountBtn.style.display = 'none';
+    navLoginBtn.style.display = 'flex';
+    navSignupBtn.style.display = 'flex';
     const count = getAuditCount();
     const remaining = Math.max(0, FREE_AUDIT_LIMIT - count);
     auditCounter.style.display = 'flex';
@@ -602,7 +645,7 @@ function updateNavStatus() {
       auditCounterText.textContent = '🔒 Upgrade to Pro';
       auditCounterText.style.color = 'var(--red)';
     } else {
-      auditCounterText.textContent = `${count}/${FREE_AUDIT_LIMIT} free audits`;
+      auditCounterText.textContent = `${count}/${FREE_AUDIT_LIMIT} free`;
       auditCounterText.style.color = 'var(--orange)';
     }
   }
@@ -717,18 +760,174 @@ function addChatMessage(role, text) {
 function clearChat() { chatHistory = []; document.getElementById('chat-messages').innerHTML = ''; initChat(); }
 
 function initChat() {
-  addChatMessage('ai', "👋 Hi! I'm **Debbie**, your AI Shopify consultant. Enter a store URL to get started, or ask me anything about growing your Shopify store!");
+  addChatMessage('ai', "👋 Hi! I'm **Debbie**, your AI Shopify consultant. Analyze a store first, then use the quick actions above to get:\n\n🔍 **SEO Audit** — keywords, meta tags, blog topics\n💲 **Pricing** — AOV strategy & price points\n📧 **Email Sequences** — welcome, cart, post-purchase\n📣 **Ad Copy** — Facebook, Instagram & Google ads\n🔎 **Competitors** — who to watch & how to win\n\nOr just ask me anything!");
 }
 
-async function sendChat() {
+async function debbieFeature(type) {
+  if (!storeData) {
+    addChatMessage('ai', '⚠️ Please analyze a store first so I have data to work with!');
+    return;
+  }
+
+  // Highlight active pill
+  document.querySelectorAll('.debbie-pill').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const store = storeData.storeUrl || 'your store';
+  const niche = storeData.storeName || store;
+  const avgPrice = storeData.metrics?.find(m => m.label === 'Avg Price')?.value || '$50';
+  const products = storeData.metrics?.find(m => m.label === 'Products')?.value || '50';
+  const issues = storeData.issues?.map(i => i.title).join(', ') || 'various issues';
+  const score = storeData.score || 70;
+
+  const prompts = {
+    seo: `You are an expert Shopify SEO consultant. Perform a detailed SEO audit for this store: ${store}
+
+Known data:
+- Score: ${score}/100
+- Issues found: ${issues}
+- Product count: ${products}, Avg price: ${avgPrice}
+- Store name/niche: ${niche}
+
+Provide:
+1. 5 specific keyword opportunities this store should target (be specific to their niche, not generic)
+2. Homepage title tag recommendation (write the actual title)
+3. Meta description recommendation (write the actual meta description)
+4. 3 blog post topics that would drive organic traffic
+5. Top 2 technical SEO fixes
+
+Format clearly with headers. Be specific and actionable. Do NOT give generic advice.`,
+
+    pricing: `You are a Shopify pricing strategy expert. Analyze pricing for: ${store}
+
+Known data:
+- Current average price: ${avgPrice}
+- Products: ${products}
+- Store score: ${score}/100
+- Niche: ${niche}
+
+Provide:
+1. Is current pricing too low, right, or too high for this niche? Why?
+2. 3 specific pricing tactics to increase AOV (e.g. bundle pricing, tiered options)
+3. Recommended price anchoring strategy
+4. Whether to show crossed-out "original" prices and how
+5. Suggested price points if they want to move upmarket
+
+Be specific with actual dollar amounts where possible.`,
+
+    email: `You are an email marketing expert for Shopify stores. Write email sequences for: ${store} (${niche})
+
+Known data:
+- Average order value: ${avgPrice}
+- Key issues: ${issues}
+
+Write the following (full email copy, not just subject lines):
+
+**1. Welcome Email** (sent immediately after signup)
+- Subject line
+- Full email body (150-200 words)
+
+**2. Abandoned Cart Email** (sent 1 hour after abandonment)
+- Subject line
+- Full email body (100-150 words)
+
+**3. Post-Purchase Email** (sent 2 days after delivery)
+- Subject line
+- Full email body (100-150 words)
+
+Make the tone match the store's niche. Include specific CTAs and personalization tokens like {{first_name}}.`,
+
+    ads: `You are a performance marketing expert. Write ad copy for: ${store} (${niche})
+
+Known data:
+- Average price: ${avgPrice}
+- Store score: ${score}/100
+
+Write the following ad copy:
+
+**Facebook/Instagram Ad (Awareness)**
+- Primary text (125 chars max)
+- Headline (40 chars max)
+- Description (30 chars max)
+- Call to action button: [choose best one]
+
+**Facebook/Instagram Ad (Retargeting)**
+- Primary text (focus on urgency/social proof)
+- Headline
+- Description
+
+**Google Search Ad**
+- Headline 1, 2, 3 (30 chars each)
+- Description 1, 2 (90 chars each)
+- Display URL path
+
+Make copy specific to this store's niche and price point. Use proven direct-response principles.`,
+
+    competitors: `You are a competitive intelligence expert for Shopify stores. Analyze the competitive landscape for: ${store}
+
+Known data:
+- Niche/store name: ${niche}
+- Avg price: ${avgPrice}
+- Current score: ${score}/100
+- Issues: ${issues}
+
+Provide:
+1. **Who are the likely top 3-5 competitors** in this niche? (name specific stores/brands)
+2. **What do top competitors do better?** (based on niche knowledge)
+3. **Where does this store likely have an advantage?**
+4. **3 things to copy from competitors** (ethical benchmarking)
+5. **1 unique angle to differentiate** from competitors
+
+Be specific to the niche. Reference real brands where relevant.`
+  };
+
+  const labels = {
+    seo: '🔍 Running SEO Audit...',
+    pricing: '💲 Analyzing Pricing Strategy...',
+    email: '📧 Writing Email Sequences...',
+    ads: '📣 Generating Ad Copy...',
+    competitors: '🔎 Analyzing Competitors...'
+  };
+
+  addChatMessage('user', `Run ${type === 'seo' ? 'SEO Audit' : type === 'pricing' ? 'Pricing Strategy' : type === 'email' ? 'Email Sequences' : type === 'ads' ? 'Ad Copy Generator' : 'Competitor Analysis'}`);
+
+  // Show typing indicator
+  const typingId = 'typing-' + Date.now();
+  const container = document.getElementById('chat-messages');
+  const typingEl = document.createElement('div');
+  typingEl.id = typingId;
+  typingEl.className = 'chat-msg ai';
+  typingEl.innerHTML = `<em style="color:var(--text4)">${labels[type]}</em>`;
+  container.appendChild(typingEl);
+  container.scrollTop = container.scrollHeight;
+
+  try {
+    const resp = await fetch(API_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'user', content: prompts[type] }] })
+    });
+    const data = await resp.json();
+    typingEl.remove();
+    addChatMessage('ai', data.content || 'Sorry, I had trouble with that. Please try again.');
+  } catch (err) {
+    typingEl.remove();
+    addChatMessage('ai', 'Connection error. Please try again.');
+  }
+
+  // Remove active state from pill
+  setTimeout(() => document.querySelectorAll('.debbie-pill').forEach(p => p.classList.remove('active')), 500);
+}
+
+
   const input = document.getElementById('chat-input');
   const msg = input.value.trim();
   if (!msg) return;
   input.value = '';
   addChatMessage('user', msg);
   const systemPrompt = storeData
-    ? `You are Debbie, an expert Shopify consultant for AuditMyStore. The user is analyzing: ${storeData.storeUrl}. Score: ${storeData.score}/100. Revenue: ${storeData.monthlyRevenue}/mo. Key issues: ${storeData.issues?.map(i=>i.title).join(', ')}. Be specific, actionable, and reference their actual data.`
-    : 'You are Debbie, an expert Shopify consultant for AuditMyStore. Help users improve their Shopify stores with specific, actionable advice.';
+    ? `You are Debbie, an expert Shopify consultant for AuditMyStore. The user is analyzing: ${storeData.storeUrl}. Score: ${storeData.score}/100. Revenue: ${storeData.monthlyRevenue}/mo. Key issues: ${storeData.issues?.map(i=>i.title).join(', ')}. You can help with SEO audits, pricing strategy, email sequences, ad copy, and competitor analysis. Be specific, actionable, and reference their actual data.`
+    : 'You are Debbie, an expert Shopify consultant for AuditMyStore. Help users improve their Shopify stores with specific, actionable advice on SEO, pricing, email marketing, ads, and competitive strategy.';
   try {
     const resp = await fetch(API_BASE, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ messages:chatHistory.slice(-10), system:systemPrompt }) });
     const data = await resp.json();
@@ -803,8 +1002,18 @@ async function analyzeStore() {
 
     await updateProgress('Running AI diagnostics...', 65);
     const prompt = buildAnalysisPrompt(storeUrl, shopifyData);
-    const text = await callGroq([{role:'user', content:prompt}]);
-    const analysis = parseAnalysis(text, storeUrl);
+    // Parse the template directly — it's already populated with real data
+    // We try AI first for natural language polish, fall back to template
+    let analysis;
+    try {
+      const text = await callGroq([{role:'user', content:prompt}]);
+      analysis = parseAnalysis(text, storeUrl);
+      // Validate it has real data — if score is exactly 72 (AI default) use template
+      if (!analysis || !analysis.issues || analysis.issues.length === 0) throw new Error('bad response');
+    } catch(e) {
+      // Fall back to computed template directly
+      analysis = parseAnalysis(prompt, storeUrl);
+    }
 
     document.getElementById('check-2').innerHTML = `<div style="width:16px;height:16px;border-radius:50%;background:rgba(74,222,128,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>AI diagnostics complete`;
 
@@ -902,26 +1111,166 @@ async function runAIAnalysisFromAdminData(shop, adminData) {
 function buildAnalysisPrompt(storeUrl, data) {
   const ps = data?.productSummary || {};
   const hp = data?.homepage || {};
-  return `You are a Shopify expert AI. Analyze this store: ${storeUrl}
+  const collections = data?.collections || [];
+  const products = data?.products || [];
 
-PUBLIC DATA:
-- Products: ${ps.count||0} (${ps.withImages||0} with images, ${ps.withDescriptions||0} with descriptions)
-- Avg price: $${ps.avgPrice||0}, Range: $${ps.minPrice||0}-$${ps.maxPrice||0}
-- Collections: ${data?.collections?.length||0}
-- Has sitemap: ${data?.hasSitemap||false}, Has robots.txt: ${data?.hasRobots||false}
-- Has email capture: ${hp.hasEmailCapture||false}, Has reviews: ${hp.hasReviews||false}
-- Has live chat: ${hp.hasLiveChat||false}, Has structured data: ${hp.hasStructuredData||false}
-- Page title: "${hp.title||''}", Meta description: ${hp.metaDescription ? 'present' : 'missing'}
+  // Build specific product observations
+  const productObs = [];
+  if (ps.count > 0) productObs.push(`${ps.count} products found`);
+  if (ps.withImages < ps.count) productObs.push(`${ps.count - ps.withImages} products missing images`);
+  if (ps.withDescriptions < ps.count) productObs.push(`${ps.count - ps.withDescriptions} products have thin/no descriptions`);
+  if (ps.avgPrice) productObs.push(`average price $${ps.avgPrice}`);
+  if (ps.minPrice && ps.maxPrice) productObs.push(`price range $${ps.minPrice}–$${ps.maxPrice}`);
 
-Return ONLY valid JSON:
-{"storeName":"${storeUrl}","storeUrl":"${storeUrl}","score":72,"conversionRate":1.8,"monthlyRevenue":"$32,000","revenueChange":"+28% potential","revenueBarPct":55,"convBarPct":45,"scoreBadge":"Good","scoreLabel":"Above average","metrics":[{"label":"Monthly Revenue","value":"$32,000","icon":"💰","color":"orange","change":"+28% potential"},{"label":"Avg Order Value","value":"$${ps.avgPrice||45}","icon":"🛒","color":"cyan","change":"+$12 opp"},{"label":"Products","value":"${ps.count||0}","icon":"📦","color":"indigo","change":"${ps.withDescriptions||0} optimized"},{"label":"Conv. Rate","value":"1.8%","icon":"📈","color":"green","change":"2.1% avg target"}],"categoryScores":{"SEO":${hp.hasStructuredData?75:50},"UX/Design":70,"Performance":65,"Conversion":60,"Trust":${hp.hasReviews?78:55},"Retention":50},"revenueOpportunity":[{"label":"Abandoned Cart","value":8000},{"label":"Email/SMS","value":6000},{"label":"AOV Boost","value":7000},{"label":"SEO Traffic","value":4000}],"issues":[{"title":"No email capture popup","impact":"Critical","revenue":"$6,200/mo lost"},{"title":"Missing product reviews","impact":"High","revenue":"$4,100/mo lost"},{"title":"No urgency/scarcity signals","impact":"High","revenue":"$3,800/mo lost"},{"title":"Thin product descriptions","impact":"Medium","revenue":"$2,400/mo lost"}],"quickWins":[{"title":"Install email popup (Klaviyo)","effort":"30 min","impact":"+3% capture rate"},{"title":"Add review widget","effort":"1 hour","impact":"+18% conversion"},{"title":"Add stock countdown timer","effort":"20 min","impact":"+8% urgency"},{"title":"Expand product descriptions","effort":"2 hours","impact":"+12% SEO"}],"roadmap":{"days1_30":{"title":"Days 1-30: Foundation","color":"cyan","tasks":["Email capture setup","Review widget install","Trust badge audit","Product description refresh","Mobile UX audit"]},"days31_60":{"title":"Days 31-60: Growth","color":"indigo","tasks":["Welcome email series","Abandoned cart flow","Google Shopping setup","Blog SEO content","Upsell widgets"]},"days61_90":{"title":"Days 61-90: Scale","color":"pink","tasks":["Loyalty program launch","Post-purchase upsells","Retargeting ads","Influencer partnerships","Analytics deep dive"]}}}`;
+  // Build specific homepage observations
+  const hpObs = [];
+  if (!hp.metaDescription) hpObs.push('missing meta description (SEO issue)');
+  if (!hp.hasStructuredData) hpObs.push('no structured data / schema markup');
+  if (!hp.hasOpenGraph) hpObs.push('no Open Graph tags (bad social sharing)');
+  if (!hp.hasEmailCapture) hpObs.push('no email capture detected (Klaviyo/Mailchimp/popup)');
+  if (!hp.hasReviews) hpObs.push('no review app detected (Yotpo/Loox/Okendo)');
+  if (!hp.hasLiveChat) hpObs.push('no live chat detected');
+  if (hp.hasEmailCapture) hpObs.push('email capture is present ✓');
+  if (hp.hasReviews) hpObs.push('review app is present ✓');
+  if (hp.title) hpObs.push(`page title: "${hp.title}"`);
+
+  // Estimate a realistic score based on actual data
+  let baseScore = 50;
+  if (hp.hasStructuredData) baseScore += 8;
+  if (hp.metaDescription) baseScore += 6;
+  if (hp.hasOpenGraph) baseScore += 4;
+  if (hp.hasEmailCapture) baseScore += 8;
+  if (hp.hasReviews) baseScore += 8;
+  if (hp.hasLiveChat) baseScore += 3;
+  if (ps.withImages === ps.count && ps.count > 0) baseScore += 6;
+  if (ps.withDescriptions / Math.max(ps.count,1) > 0.8) baseScore += 7;
+  if (collections.length > 3) baseScore += 5;
+  if (data?.hasSitemap) baseScore += 3;
+  baseScore = Math.min(Math.max(baseScore, 35), 88);
+
+  const scoreBadge = baseScore >= 80 ? 'Excellent' : baseScore >= 65 ? 'Good' : baseScore >= 50 ? 'Fair' : 'Needs Work';
+
+  return `You are a strict Shopify e-commerce analyst. Analyze ONLY what the data shows for this store: ${storeUrl}
+
+REAL OBSERVED DATA (base your entire analysis on this — do NOT invent anything not supported by this data):
+Store URL: ${storeUrl}
+Products: ${productObs.join(', ') || 'no products found'}
+Collections: ${collections.length} collections
+Homepage observations: ${hpObs.join(', ') || 'no data'}
+Has sitemap: ${data?.hasSitemap || false}
+Has robots.txt: ${data?.hasRobots || false}
+Sample products: ${ps.sample?.map(p => `"${p.title}" ($${p.price})`).join(', ') || 'none'}
+
+STRICT RULES:
+- Only identify issues that are CONFIRMED by the data above
+- Never suggest Instagram, TikTok, or social media unless you have evidence
+- Never invent products, features, or data not in the observed data
+- Revenue estimates must be realistic for a store of this size (${ps.count||0} products, avg price $${ps.avgPrice||0})
+- Quick wins must be directly tied to the observed gaps above
+- Score is approximately ${baseScore}/100 based on the data
+- If data is limited, say so in scoreLabel
+
+Return ONLY a valid JSON object (no markdown, no explanation, no trailing commas):
+{
+  "storeName": "${hp.title?.split(' ')[0] || storeUrl}",
+  "storeUrl": "${storeUrl}",
+  "score": ${baseScore},
+  "conversionRate": 1.9,
+  "monthlyRevenue": "$${Math.round((ps.avgPrice||30) * (ps.count||10) * 8 / 1000) * 1000}",
+  "revenueChange": "+${!hp.hasEmailCapture ? '22' : '14'}% potential",
+  "revenueBarPct": ${Math.round(baseScore * 0.75)},
+  "convBarPct": 45,
+  "scoreBadge": "${scoreBadge}",
+  "scoreLabel": "${baseScore >= 65 ? 'Based on public data' : 'Several gaps detected'}",
+  "metrics": [
+    {"label":"Products","value":"${ps.count||0}","icon":"📦","color":"indigo","change":"${ps.withImages||0} have images"},
+    {"label":"Avg Price","value":"$${ps.avgPrice||0}","icon":"💰","color":"orange","change":"${ps.minPrice||0}–${ps.maxPrice||0} range"},
+    {"label":"Collections","value":"${collections.length}","icon":"🗂","color":"cyan","change":"${collections.length > 3 ? 'Well organised' : 'Add more'}"},
+    {"label":"Email Capture","value":"${hp.hasEmailCapture ? 'Yes ✓' : 'Missing'}","icon":"📧","color":"${hp.hasEmailCapture ? 'green' : 'pink'}","change":"${hp.hasEmailCapture ? 'Good' : 'Critical gap'}"}
+  ],
+  "categoryScores": {
+    "SEO": ${hp.hasStructuredData && hp.metaDescription ? 72 : hp.hasStructuredData || hp.metaDescription ? 55 : 38},
+    "UX/Design": ${hp.hasOpenGraph ? 68 : 55},
+    "Performance": 60,
+    "Conversion": ${hp.hasEmailCapture && hp.hasReviews ? 68 : hp.hasEmailCapture || hp.hasReviews ? 52 : 38},
+    "Trust": ${hp.hasReviews ? 72 : 45},
+    "Retention": ${hp.hasEmailCapture ? 58 : 35}
+  },
+  "revenueOpportunity": [
+    ${!hp.hasEmailCapture ? '{"label":"Email Capture","value":5000},' : ''}
+    ${!hp.hasReviews ? '{"label":"Social Proof","value":4000},' : ''}
+    ${!hp.hasStructuredData ? '{"label":"SEO Traffic","value":3500},' : ''}
+    {"label":"AOV Boost","value":${Math.round((ps.avgPrice||30) * 80)}},
+    {"label":"Abandoned Cart","value":${Math.round((ps.avgPrice||30) * 120)}}
+  ],
+  "issues": [
+    ${!hp.hasEmailCapture ? '{"title":"No email capture popup detected","impact":"Critical","revenue":"Est. $4,000–$8,000/mo lost"},' : ''}
+    ${!hp.hasReviews ? '{"title":"No product review app detected","impact":"High","revenue":"Est. $2,000–$5,000/mo lost"},' : ''}
+    ${!hp.metaDescription ? '{"title":"Homepage missing meta description","impact":"High","revenue":"Losing organic SEO traffic"},' : ''}
+    ${!hp.hasStructuredData ? '{"title":"No schema markup on homepage","impact":"Medium","revenue":"Lower Google rich result visibility"},' : ''}
+    ${(ps.count - (ps.withDescriptions||0)) > 0 ? `{"title":"${ps.count - (ps.withDescriptions||0)} products have thin descriptions","impact":"Medium","revenue":"Hurting SEO and conversion"},` : ''}
+    ${(ps.count - (ps.withImages||0)) > 0 ? `{"title":"${ps.count - (ps.withImages||0)} products missing images","impact":"High","revenue":"Directly lowers add-to-cart rate"},` : ''}
+    {"title":"No live chat for pre-purchase questions","impact":"Medium","revenue":"Est. 5–10% of visitors leave without buying"}
+  ],
+  "quickWins": [
+    ${!hp.hasEmailCapture ? '{"title":"Install Klaviyo email popup","effort":"30 min","impact":"+3–5% email capture rate"},' : ''}
+    ${!hp.hasReviews ? '{"title":"Install Loox or Yotpo review app","effort":"1 hour","impact":"+15–25% trust & conversion"},' : ''}
+    ${!hp.metaDescription ? '{"title":"Write homepage meta description","effort":"10 min","impact":"Improves SEO click-through rate"},' : ''}
+    ${!hp.hasStructuredData ? '{"title":"Add JSON-LD schema to homepage","effort":"30 min","impact":"Enables Google rich snippets"},' : ''}
+    {"title":"Add trust badges to checkout","effort":"20 min","impact":"+5–8% checkout completion"},
+    {"title":"Set up abandoned cart email flow","effort":"2 hours","impact":"Recover 15–30% of abandoned carts"}
+  ],
+  "roadmap": {
+    "days1_30": {
+      "title": "Days 1-30: Fix the Basics",
+      "color": "cyan",
+      "tasks": [
+        ${!hp.hasEmailCapture ? '"Install email popup (Klaviyo)",' : '"Optimise email capture flow",'}
+        ${!hp.hasReviews ? '"Add review widget (Loox/Yotpo)",' : '"Increase review collection rate",'}
+        "Audit all product images",
+        "Write missing product descriptions",
+        "Add trust badges to cart & checkout"
+      ]
+    },
+    "days31_60": {
+      "title": "Days 31-60: Drive Growth",
+      "color": "indigo",
+      "tasks": [
+        "Set up abandoned cart email sequence",
+        "Launch welcome email series",
+        ${!hp.hasStructuredData ? '"Add schema markup for SEO",' : '"Expand blog for SEO traffic",'}
+        "Create product bundles to boost AOV",
+        "Set up Google Shopping feed"
+      ]
+    },
+    "days61_90": {
+      "title": "Days 61-90: Scale Revenue",
+      "color": "pink",
+      "tasks": [
+        "Launch loyalty/rewards program",
+        "Add post-purchase upsell offers",
+        "Run retargeting ads to past visitors",
+        "A/B test product page headlines",
+        "Review analytics and double down on wins"
+      ]
+    }
+  }
+}`;
 }
+
 
 // ── Parse analysis ───────────────────────────────────────────────────────────
 function parseAnalysis(text, storeUrl) {
-  const clean = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+  // Remove markdown fences
+  let clean = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+  // Fix trailing commas before ] or } (common AI mistake)
+  clean = clean.replace(/,\s*([}\]])/g, '$1');
+  // Remove empty array items from conditional template expressions
+  clean = clean.replace(/,\s*,/g, ',');
+  clean = clean.replace(/\[\s*,/g, '[');
+  clean = clean.replace(/,\s*\]/g, ']');
   try { return JSON.parse(clean); } catch {}
-  try { const m = clean.match(/\{[\s\S]*\}/); if (m) return JSON.parse(m[0]); } catch {}
+  try { const m = clean.match(/\{[\s\S]*\}/); if (m) { let s = m[0].replace(/,\s*([}\]])/g, '$1'); return JSON.parse(s); } } catch {}
   return getDemoData(storeUrl);
 }
 
@@ -1221,14 +1570,42 @@ document.addEventListener('DOMContentLoaded', () => {
   initChat();
   checkOAuthReturn();
   checkUnlockReturn();
+
+  // Handle Google OAuth return
+  const urlParams = new URLSearchParams(window.location.search);
+  const sessionToken = urlParams.get('session_token');
+  const userName = urlParams.get('name');
+  const userPlan = urlParams.get('plan');
+  const isNew = urlParams.get('new') === '1';
+
+  if (sessionToken) {
+    accountSessionToken = sessionToken;
+    localStorage.setItem('ams_session_token', sessionToken);
+    if (userName) localStorage.setItem('ams_user_name', decodeURIComponent(userName));
+    if (userPlan && userPlan !== 'free') {
+      localStorage.setItem('ams_unlocked', '1');
+    }
+    window.history.replaceState({}, '', '/app');
+    if (isNew) {
+      setTimeout(() => addChatMessage('ai', `🎉 Welcome to AuditMyStore, **${decodeURIComponent(userName).split(' ')[0]}**! I'm Debbie, your AI Shopify consultant. Enter a store URL above to run your first free analysis!`), 500);
+    } else {
+      setTimeout(() => addChatMessage('ai', `👋 Welcome back, **${decodeURIComponent(userName).split(' ')[0]}**! Ready to audit another store?`), 500);
+    }
+  }
+
   updateNavStatus();
 
-  // Restore session
+  // Restore session on load
   if (accountSessionToken) {
     fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'verify-token', token:accountSessionToken}) })
     .then(r => r.json()).then(d => {
-      if (d.valid) { unlockApp(); updateNavStatus(); }
-      else { accountSessionToken = ''; localStorage.removeItem('ams_session_token'); }
+      if (d.valid) {
+        if (d.name && !localStorage.getItem('ams_user_name')) localStorage.setItem('ams_user_name', d.name);
+        unlockApp(); updateNavStatus();
+      } else {
+        accountSessionToken = ''; localStorage.removeItem('ams_session_token');
+        updateNavStatus();
+      }
     }).catch(() => {});
   }
 

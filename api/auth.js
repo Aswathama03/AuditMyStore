@@ -60,7 +60,7 @@ export default function handler(req, res) {
   // Store state in a short-lived cookie for CSRF validation in the callback
   res.setHeader(
     'Set-Cookie',
-    `shopify_oauth_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=300`
+    `shopify_oauth_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`
   );
 
   return res.redirect(302, authUrl);

@@ -175,7 +175,7 @@ export default async function handler(req, res) {
   // Fetch authorized Admin data
   if (type === 'shopify-admin-fetch') {
     if (!shop) return res.status(400).json({ error: 'shop is required' });
-    const token = getToken(shop);
+    const token = await getToken(shop);
     if (!token) return res.status(401).json({ error: 'not_authorized', shop });
     try {
       return res.status(200).json({ adminData: await fetchAdminData(shop, token) });
@@ -197,7 +197,8 @@ export default async function handler(req, res) {
   // Check if a shop has been authorized
   if (type === 'check-auth') {
     if (!shop) return res.status(400).json({ error: 'shop is required' });
-    return res.status(200).json({ authorized: !!getToken(shop) });
+    const token = await getToken(shop);
+    return res.status(200).json({ authorized: !!token });
   }
 
   // Groq AI chat
