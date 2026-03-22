@@ -568,9 +568,11 @@ canvas{max-width:100%}
 
 <!-- PAYWALL MODAL -->
 <div class="paywall-overlay" id="paywall-overlay">
-  <div class="paywall-card glass">
+  <div class="paywall-card glass" style="position:relative">
+    <!-- Close button -->
+    <button onclick="hidePaywall()" style="position:absolute;top:14px;right:14px;background:var(--bg3);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:16px;line-height:1;transition:all .15s" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='var(--bg3)'">✕</button>
     <div style="text-align:center;margin-bottom:20px">
-      <div style="width:52px;height:52px;background:var(--teal-d);border-radius:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-weight:700;color:white;font-size:14px">AMS</div>
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,var(--orange-d),var(--orange));border-radius:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-weight:700;color:white;font-size:14px">AMS</div>
       <h2 style="font-size:20px;font-weight:700;margin-bottom:6px" class="gradient-text">You've Used Your Free Audits</h2>
       <p style="font-size:14px;color:var(--text3);font-weight:500">Upgrade to Pro for unlimited audits and real store data.</p>
     </div>
@@ -737,10 +739,13 @@ async function checkUnlockReturn() {
   const unlocked = params.get('unlocked');
   if (!sessionId || !unlocked) return;
   window.history.replaceState({}, '', '/app');
-  // Only skip verification if already a paid user
   if (accountSessionToken && isUnlocked()) { updateNavStatus(); return; }
   try {
-    const resp = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({session_id:sessionId}) });
+    const resp = await fetch('/api/login', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ action: 'verify-license', session_id: sessionId })
+    });
     const data = await resp.json();
     if (data.valid) {
       pendingSessionId = sessionId;
@@ -765,10 +770,13 @@ async function registerAccount() {
     if (!resp.ok) { notify(data.error || 'Registration failed'); return; }
     accountSessionToken = data.token;
     localStorage.setItem('ams_session_token', data.token);
-    unlockApp(); updateNavStatus();
+    localStorage.setItem('ams_user_name', data.name || email.split('@')[0]);
+    unlockApp();
+    hidePaywall();
     document.getElementById('set-password-modal').classList.remove('show');
-    notify('🎉 Account created! You are now Pro on any device.', 5000);
-    addChatMessage('ai', '🎉 Welcome to **AuditMyStore Pro**! Unlimited audits activated. Log in from any device with your email and password.');
+    updateNavStatus();
+    notify('🎉 Pro unlocked! Unlimited audits activated.', 5000);
+    addChatMessage('ai', "🎉 Welcome to **AuditMyStore Pro**! Unlimited audits activated. You can now connect your store for real data and use all of Debbie's features!");
   } catch (err) { btn.textContent = 'Create Account & Unlock Pro'; btn.disabled = false; notify('Registration error'); }
 }
 
